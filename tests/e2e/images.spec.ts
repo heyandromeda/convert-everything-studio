@@ -1,15 +1,7 @@
-import { expect, test } from '@playwright/test'
-import { addFiles, ascii, chooseTarget, convertAndWait, download, probe } from './helpers'
+import { expect, test, addFiles, ascii, chooseTarget, convertAndWait, download, probe } from './helpers'
 
 test.describe('image conversions', () => {
   test.beforeEach(async ({ page }) => {
-    // Any request to another origin would be a privacy bug.
-    page.on('request', (req) => {
-      const url = new URL(req.url())
-      if (!['localhost', '127.0.0.1'].includes(url.hostname) && !url.protocol.startsWith('blob') && !url.protocol.startsWith('data')) {
-        throw new Error(`Unexpected external request: ${req.url()}`)
-      }
-    })
     await page.goto('/')
   })
 

@@ -1,5 +1,4 @@
-import { expect, test } from '@playwright/test'
-import { addFiles, ascii, chooseTarget, convertAndWait, download } from './helpers'
+import { expect, test, addFiles, ascii, chooseTarget, convertAndWait, download } from './helpers'
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/')

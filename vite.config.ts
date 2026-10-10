@@ -84,6 +84,13 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,wasm}'],
         globIgnores: ['**/vendor/**', '**/avif_enc*', '**/pdf.worker*', '**/ffmpeg*'],
         maximumFileSizeToCacheInBytes: 1024 * 1024,
+        // Precache the app shell and the light image path only; larger engines are cached on first use.
+        manifestTransforms: [
+          async (entries) => ({
+            manifest: entries.filter((e) => e.size < 160 * 1024 || /assets\/index-[\w-]+\.js$/.test(e.url) || /webp_enc_simd-[\w-]+\.wasm$/.test(e.url)),
+            warnings: [],
+          }),
+        ],
         navigateFallback: '/index.html',
         runtimeCaching: [
           {

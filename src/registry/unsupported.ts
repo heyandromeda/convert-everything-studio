@@ -22,9 +22,19 @@ export const UNSUPPORTED: UnsupportedNote[] = [
     reason: 'Rebuilding an editable Word document from PDF layout needs a desktop-class engine. Text extraction to TXT is offered instead.',
   },
   {
-    from: ['doc', 'xls', 'ppt'],
+    from: ['doc', 'ppt'],
     to: 'Any format',
-    reason: 'Legacy binary Office files (97–2003) need a full Office engine. Re-save as DOCX/XLSX/PPTX first.',
+    reason: 'Legacy binary Word and PowerPoint files (97–2003) need a full Office engine. Re-save as DOCX/PPTX first.',
+  },
+  {
+    from: ['pptx', 'odp'],
+    to: 'PDF / slide images',
+    reason: 'No in-browser renderer reproduces PowerPoint layout faithfully, so rendered output is not offered. Slide text and embedded media can be extracted.',
+  },
+  {
+    from: ['odt', 'odp'],
+    to: 'Any format',
+    reason: 'OpenDocument text and presentation rendering is not implemented yet. Save as DOCX or PPTX first.',
   },
   {
     from: ['rtf'],

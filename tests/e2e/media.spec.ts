@@ -1,7 +1,6 @@
-import { expect, test } from '@playwright/test'
-import { addFiles, chooseTarget, convertAndWait, download, probe } from './helpers'
+import { expect, test, addFiles, chooseTarget, convertAndWait, download, probe } from './helpers'
 
-// FFmpeg.wasm is ~32 MB and slow; one browser per run is enough locally, all three in CI.
+// FFmpeg.wasm is ~32 MB and runs single-threaded, so these tests get a longer timeout.
 test.describe.configure({ timeout: 240_000 })
 
 test.beforeEach(async ({ page }) => {

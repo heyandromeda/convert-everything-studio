@@ -1,7 +1,27 @@
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
-import { expect, type Page } from '@playwright/test'
+import { test as base, expect, type Page } from '@playwright/test'
+
+/** Every test fails if the app contacts any origin other than the one serving it. */
+export const test = base.extend<{ externalRequests: string[] }>({
+  externalRequests: [
+    async ({ page, baseURL }, use) => {
+      const seen: string[] = []
+      const allowed = new Set([new URL(baseURL ?? 'http://localhost').origin])
+      if (process.env.LIVE_URL) allowed.add(new URL(process.env.LIVE_URL).origin)
+      page.on('request', (r) => {
+        const u = new URL(r.url())
+        if (u.protocol.startsWith('http') && !allowed.has(u.origin)) seen.push(r.url())
+      })
+      await use(seen)
+      expect(seen, 'requests to other origins').toEqual([])
+    },
+    { auto: true },
+  ],
+})
+
+export { expect }
 
 export const fixture = (name: string) => path.join(import.meta.dirname, '..', 'fixtures', name)
 

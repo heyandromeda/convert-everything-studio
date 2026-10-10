@@ -2,10 +2,9 @@ import { execFileSync } from 'node:child_process'
 import { copyFileSync, mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { expect, test } from '@playwright/test'
 import * as XLSX from 'xlsx'
 import YAML from 'yaml'
-import { addFiles, ascii, chooseTarget, convertAndWait, download, probe } from './helpers'
+import { expect, test, addFiles, ascii, chooseTarget, convertAndWait, download, probe } from './helpers'
 
 type Check = (out: { name: string; bytes: Buffer; path: string }) => void
 

@@ -1,5 +1,4 @@
-import { expect, test } from '@playwright/test'
-import { addFiles, ascii, chooseTarget, convertAndWait, download, probe } from './helpers'
+import { expect, test, addFiles, ascii, chooseTarget, convertAndWait, download, probe } from './helpers'
 
 /**
  * Smoke test against a deployed preview. Skipped unless LIVE_URL is set, e.g.

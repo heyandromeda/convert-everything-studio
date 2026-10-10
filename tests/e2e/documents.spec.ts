@@ -1,7 +1,6 @@
 import { execFileSync } from 'node:child_process'
-import { expect, test } from '@playwright/test'
 import * as XLSX from 'xlsx'
-import { addFiles, ascii, chooseTarget, convertAndWait, download } from './helpers'
+import { expect, test, addFiles, ascii, chooseTarget, convertAndWait, download } from './helpers'
 
 const pdfText = (file: string) => execFileSync('pdftotext', ['-layout', file, '-'], { encoding: 'utf8' })
 const pdfPages = (file: string) => Number(/Pages:\s+(\d+)/.exec(execFileSync('pdfinfo', [file], { encoding: 'utf8' }))![1])
