@@ -72,10 +72,20 @@ for i in range(1, 4):
     c.showPage()
 c.save()
 
+def font(size):
+    from PIL import ImageFont
+    for path in ['/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf']:
+        if os.path.exists(path):
+            return ImageFont.truetype(path, size)
+    return ImageFont.load_default(size=size)
+
+
 # PDF: image-only page, simulating a scan
-img = Image.new('RGB', (600, 800), 'white')
+img = Image.new('RGB', (1240, 1754), 'white')
 d = ImageDraw.Draw(img)
-d.text((50, 50), 'Scanned text (pixels only)', fill='black')
+d.text((120, 160), 'Scanned invoice', fill='black', font=font(64))
+d.text((120, 300), 'Total amount due: 42 dollars', fill='black', font=font(40))
+d.text((120, 380), 'Thank you for your business', fill='black', font=font(40))
 img_path = p('_scan.png')
 img.save(img_path)
 c = canvas.Canvas(p('scanned.pdf'), pagesize=A4)
@@ -139,5 +149,12 @@ with tarfile.open(p('bundle.tar.gz'), 'w:gz') as tf:
         info = tarfile.TarInfo(name)
         info.size = len(data)
         tf.addfile(info, io.BytesIO(data))
+
+# Photo of printed text for image OCR
+sign = Image.new('RGB', (1200, 400), '#f8f8f4')
+d = ImageDraw.Draw(sign)
+d.text((60, 80), 'Private file conversion', fill='#111111', font=font(72))
+d.text((60, 220), 'Nothing leaves your device', fill='#222222', font=font(56))
+sign.save(p('sign.png'))
 
 print('fixtures written to', os.path.abspath(OUT))

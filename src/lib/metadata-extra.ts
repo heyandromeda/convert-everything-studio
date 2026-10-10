@@ -13,7 +13,7 @@ export async function inspectExtra(file: File, fmt: string): Promise<FileMetadat
       const info = await pdfInfo(file)
       return {
         document: { pageCount: info.pageCount, title: info.title, hasText: info.hasText },
-        notes: info.hasText === false ? ['The first page has no selectable text — this PDF may be scanned. Text extraction would need OCR.'] : undefined,
+        notes: info.hasText === false ? ['The first page has no selectable text — this PDF may be scanned. Use “Text via OCR” to read it.'] : undefined,
       }
     }
     case 'docx':

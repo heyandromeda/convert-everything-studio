@@ -82,11 +82,11 @@ export const pdfToText: ConverterFn = async (ctx) => {
       throw new ConversionError(
         'no-text',
         'This PDF has no selectable text',
-        'It appears to be scanned or made of images. Extracting text from it requires OCR (optical character recognition), which this app does not perform.',
-        'Use "PDF → PNG pages" to get images of the pages instead.',
+        'It appears to be scanned or made of images, so its text can only be read with OCR (optical character recognition).',
+        'Choose “Text via OCR (scanned PDFs)” as the output instead.',
       )
     }
-    const warnings = emptyPages ? [`${emptyPages} page${emptyPages === 1 ? ' has' : 's have'} no selectable text (likely scanned images); OCR would be needed for those.`] : []
+    const warnings = emptyPages ? [`${emptyPages} page${emptyPages === 1 ? ' has' : 's have'} no selectable text (likely scanned images). Use “Text via OCR” for those pages.`] : []
     warnings.push('Only the text is extracted. Layout, fonts, tables and images are not preserved.')
     return {
       outputs: [{ blob: new Blob([chunks.join('\n\n') + '\n'], { type: 'text/plain;charset=utf-8' }), name: outputName(ctx.file.name, 'txt'), formatId: 'txt' }],

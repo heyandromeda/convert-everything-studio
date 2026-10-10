@@ -239,3 +239,18 @@ test('7z extraction with libarchive', async ({ page }) => {
   expect(contents['hello.txt'].toString()).toBe('seven zip text\n')
   expect(ascii(contents['alpha.png'], 1, 3)).toBe('PNG')
 })
+
+test('OCR: image → text and scanned PDF → text (self-hosted Tesseract)', async ({ page }) => {
+  test.setTimeout(240_000)
+  await addFiles(page, ['sign.png', 'scanned.pdf'])
+  await chooseTarget(page, 0, 'image-ocr')
+  await chooseTarget(page, 1, 'pdf-ocr')
+  await convertAndWait(page, 2)
+  const img = (await download(page, 0)).bytes.toString('utf8')
+  expect(img).toMatch(/Private file conversion/i)
+  expect(img).toMatch(/Nothing leaves your device/i)
+  const pdf = (await download(page, 1)).bytes.toString('utf8')
+  expect(pdf).toContain('--- Page 1 ---')
+  expect(pdf).toMatch(/Total amount due/i)
+  await expect(page.getByTestId('file-card').first()).toContainText('average confidence')
+})

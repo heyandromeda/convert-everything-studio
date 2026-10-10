@@ -100,6 +100,14 @@ export const documentConversions: ConversionDef[] = [
     outputs: 'single', load: async () => (await pdfRead()).pdfToText,
   },
   {
+    id: 'pdf-ocr', from: ['pdf'], to: 'txt', label: 'Text via OCR (scanned PDFs)', description: 'Reads text from page images with Tesseract OCR. Use this for scanned documents.',
+    engine: 'tesseract-wasm', status: 'limited', lossy: true, editable: true, formatting: 'none', cost: 'heavy',
+    limitations: ['English only.', 'OCR is approximate: expect errors with small print, handwriting, unusual fonts or skewed scans.', 'Downloads ~7 MB the first time; about 5–20 s per page on a phone.'],
+    options: [pagesField], outputs: 'single', maxInputMB: { mobile: 150, desktop: 600 },
+    requires: (caps) => (caps.webAssembly ? { available: true } : { available: false, reason: 'OCR needs WebAssembly.' }),
+    load: async () => (await import('@/engines/documents/ocr')).pdfToTextOcr,
+  },
+  {
     id: 'pdf-to-png', from: ['pdf'], to: 'png', label: 'PNG images (one per page)', engine: 'pdfjs', status: 'stable', lossy: false, editable: false, formatting: 'full', cost: 'medium',
     limitations: ['Pages become pictures: text is not selectable.', 'Very large pages are rendered at reduced DPI on iPhone.'],
     options: [pagesField, { key: 'dpi', kind: 'select', label: 'Resolution', default: '150', choices: [{ value: '72', label: '72 DPI (screen)' }, { value: '150', label: '150 DPI' }, { value: '300', label: '300 DPI (print)' }] }],

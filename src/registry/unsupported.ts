@@ -19,7 +19,7 @@ export const UNSUPPORTED: UnsupportedNote[] = [
   {
     from: ['pdf'],
     to: 'DOCX',
-    reason: 'Rebuilding an editable Word document from PDF layout needs a desktop-class engine. Text extraction to TXT is offered instead.',
+    reason: 'Rebuilding an editable Word document from PDF layout needs a desktop-class engine. Text extraction (and OCR for scans) is offered instead.',
   },
   {
     from: ['doc', 'ppt'],

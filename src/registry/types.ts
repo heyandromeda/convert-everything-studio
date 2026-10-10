@@ -44,6 +44,7 @@ export type EngineId =
   | 'tar-reader'
   | 'ffmpeg-wasm'
   | 'libarchive-wasm'
+  | 'tesseract-wasm'
   | 'ooxml-reader'
 
 export type Cost = 'light' | 'medium' | 'heavy'

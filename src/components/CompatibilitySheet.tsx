@@ -30,6 +30,7 @@ const ENGINE_LABEL: Record<string, string> = {
   'tar-reader': 'Built-in TAR reader',
   'ffmpeg-wasm': 'FFmpeg (WebAssembly)',
   'libarchive-wasm': 'libarchive (WebAssembly)',
+  'tesseract-wasm': 'Tesseract OCR (WebAssembly)',
   'ooxml-reader': 'Built-in OOXML reader',
 }
 

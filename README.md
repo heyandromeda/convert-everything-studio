@@ -58,6 +58,7 @@ Status meanings:
 | same | **SVG (embedded bitmap)**: not vector tracing | Canvas | With limits | PNG→SVG wrapper |
 | JPEG, PNG | **Remove metadata (lossless)**: strips EXIF/GPS/XMP/IPTC/comments, keeps ICC profile and orientation | built-in byte editor | Supported | JPEG comment removed, pixels byte-identical (unit + e2e) |
 | several images | **One PDF** (a page per image) | pdf-lib | Supported | 2 images → 2-page PDF |
+| PNG, JPEG, WebP, AVIF, GIF, BMP, TIFF, HEIC | **Text via OCR** (English) | Tesseract (WASM, self-hosted) | With limits: approximate, confidence reported | sign.png text recognised |
 
 All image conversions support resize (fit within, percentage, exact with aspect lock), compression presets or a quality slider, and lossless WebP. Re-encoding never copies EXIF/GPS. Orientation is applied.
 ¹ AVIF input needs a browser that decodes AVIF (Safari 16+, Chrome, Firefox). ² HEIC is decoded natively by Safari; other browsers use a bundled [libheif](https://github.com/strukturag/libheif) WebAssembly build (LGPL-3.0, ~2 MB, loaded only for HEIC files). Verified HEIC→JPEG in Chromium, WebKit and Firefox.
@@ -75,7 +76,7 @@ All image conversions support resize (fit within, percentage, exact with aspect 
 | TXT | PDF / HTML | pdfmake / DOM | Supported | pdftotext |
 | TXT, CSV, TSV, MD, SRT, VTT | Same format re-encoded as UTF-8 (from Windows-1252, Latin-1, Shift_JIS, GB18030, …) | TextDecoder | Supported | Windows-1252 → UTF-8 |
 | PDF | Plain text (extraction only) | pdf.js | Supported | page markers, page ranges |
-| PDF (scanned) | — | — | Detected: explains that OCR is required | ✓ |
+| PDF (scanned) | Text via OCR (English) | Tesseract (WASM, self-hosted, ~7 MB on first use) | With limits: approximate, confidence reported | "Total amount due" recognised in all three browsers |
 | PDF | PNG / JPEG page images (72/150/300 DPI) | pdf.js | Supported | ✓ |
 | PDF | PDF with selected pages (text stays selectable) | pdf-lib | Supported | pdfinfo page count |
 | PDF | PDF without metadata | pdf-lib | Supported | author removed (pdfinfo) |
@@ -139,7 +140,7 @@ Options: bitrate, sample rate, mono/stereo, trim (start/end), remove tags; for v
 | DOC, XLS*, PPT (97–2003 binary) | Need a full Office engine. *XLS is supported through SheetJS. |
 | RTF, ODT, EPUB, ODP rendering | No reliable bundled renderer yet. |
 | Keynote, Numbers | Proprietary format. |
-| OCR for scanned PDFs | Not included; the app detects scanned PDFs and says so. |
+| OCR in languages other than English | Only the English model is bundled (each language adds 2–4 MB). |
 | H.265/VP9/AV1 encoding | Too slow single-threaded in WebAssembly to be useful. |
 
 ---
@@ -241,6 +242,6 @@ LIVE_URL=https://your-preview.example LIVE_PASSWORD=optional npx playwright test
 - Single-threaded FFmpeg is slow for long or high-resolution video, especially on phones. Copy-streams mode avoids re-encoding when the codecs fit the container.
 - AVIF encoding is slow on phones.
 - XLSX → CSV writes the last saved results of formulas; SheetJS does not recalculate.
-- OCR, PPTX rendering, RTF/ODT/EPUB rendering and HEIC encoding are not available (see the table above).
+- Non-English OCR, PPTX rendering, RTF/ODT/EPUB rendering and HEIC encoding are not available (see the table above).
 - libheif is LGPL-3.0. It is shipped as a separate, unmodified, dynamically loaded module (`libheif-js`), so it can be replaced independently of the app.
 - The main JS bundle is ~160 KB gzipped (React + UI). All engines are code-split and loaded on demand.

@@ -14,6 +14,11 @@ const copies = [
   ['node_modules/pdfjs-dist/standard_fonts', 'pdfjs/standard_fonts'],
   ['node_modules/pdfjs-dist/wasm', 'pdfjs/wasm'],
   ['node_modules/libarchive.js/dist/worker-bundle.js', 'libarchive/worker-bundle.js'],
+  ['node_modules/tesseract.js/dist/worker.min.js', 'tesseract/worker.min.js'],
+  ['node_modules/tesseract.js-core/tesseract-core-lstm.wasm.js', 'tesseract/core/tesseract-core-lstm.wasm.js'],
+  ['node_modules/tesseract.js-core/tesseract-core-simd-lstm.wasm.js', 'tesseract/core/tesseract-core-simd-lstm.wasm.js'],
+  ['node_modules/tesseract.js-core/tesseract-core-relaxedsimd-lstm.wasm.js', 'tesseract/core/tesseract-core-relaxedsimd-lstm.wasm.js'],
+  ['node_modules/@tesseract.js-data/eng/4.0.0_best_int/eng.traineddata.gz', 'tesseract/lang/eng.traineddata.gz'],
   ['node_modules/libarchive.js/dist/libarchive.wasm', 'libarchive/libarchive.wasm'],
 ]
 
