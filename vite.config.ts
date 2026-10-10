@@ -23,11 +23,35 @@ export const CSP = [
   "form-action 'none'",
 ].join('; ')
 
-function cspMeta(): Plugin {
+const SECURITY_HEADERS: Record<string, string> = {
+  'Content-Security-Policy': `${CSP}; frame-ancestors 'none'`,
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'no-referrer',
+  'X-Frame-Options': 'DENY',
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()',
+}
+
+/** Injects the CSP meta tag and writes host header files (Netlify `_headers`, `vercel.json`). */
+function securityHeaders(): Plugin {
   return {
-    name: 'csp-meta',
+    name: 'security-headers',
     apply: 'build',
     transformIndexHtml: (html) => html.replace('<head>', `<head>\n    <meta http-equiv="Content-Security-Policy" content="${CSP}" />`),
+    generateBundle() {
+      const lines = ['/*', ...Object.entries(SECURITY_HEADERS).map(([k, v]) => `  ${k}: ${v}`)]
+      lines.push('/assets/*', '  Cache-Control: public, max-age=31536000, immutable')
+      lines.push('/sw.js', '  Cache-Control: no-cache')
+      this.emitFile({ type: 'asset', fileName: '_headers', source: lines.join('\n') + '\n' })
+      const vercel = {
+        headers: [
+          { source: '/(.*)', headers: Object.entries(SECURITY_HEADERS).map(([key, value]) => ({ key, value })) },
+          { source: '/assets/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
+          { source: '/sw.js', headers: [{ key: 'Cache-Control', value: 'no-cache' }] },
+        ],
+      }
+      this.emitFile({ type: 'asset', fileName: 'vercel.json', source: JSON.stringify(vercel, null, 2) })
+    },
   }
 }
 
@@ -35,7 +59,7 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    cspMeta(),
+    securityHeaders(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'script-defer',
@@ -89,5 +113,5 @@ export default defineConfig({
     chunkSizeWarningLimit: 1500,
   },
   server: { host: true, port: 4791, strictPort: true },
-  preview: { host: true, port: 4792, strictPort: true },
+  preview: { host: true, port: 4792, strictPort: true, allowedHosts: ['.trycloudflare.com'] },
 })
