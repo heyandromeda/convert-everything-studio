@@ -36,7 +36,8 @@ const AUDIO_CODEC: Record<string, { codec: string[]; lossy: boolean; container?:
   m4a: { codec: ['-c:a', 'aac'], lossy: true, container: ['-movflags', '+faststart'] },
   aac: { codec: ['-c:a', 'aac'], lossy: true, container: ['-f', 'adts'] },
   ogg: { codec: ['-c:a', 'libvorbis'], lossy: true },
-  opus: { codec: ['-c:a', 'libopus'], lossy: true, container: ['-f', 'ogg'] },
+  // libopus crashes the WebAssembly build on stereo input; FFmpeg's native encoder is stable.
+  opus: { codec: ['-c:a', 'opus', '-strict', '-2'], lossy: true, container: ['-f', 'ogg'] },
   flac: { codec: ['-c:a', 'flac'], lossy: false },
   wav: { codec: ['-c:a', 'pcm_s16le'], lossy: false },
   aiff: { codec: ['-c:a', 'pcm_s16be'], lossy: false, container: ['-f', 'aiff'] },
@@ -47,10 +48,11 @@ const LOSSLESS_AUDIO = new Set(['wav', 'flac', 'aiff'])
 function audioParams(o: OptionValues, target: string): string[] {
   const args: string[] = []
   if (AUDIO_CODEC[target].lossy) args.push('-b:a', `${Number(o.bitrate ?? 192)}k`)
-  if (o.sampleRate && o.sampleRate !== 'keep') args.push('-ar', String(o.sampleRate))
-  else if (target === 'opus') args.push('-ar', '48000')
+  // Opus is defined at 48 kHz; other rates are rejected by the encoder.
+  if (target === 'opus') args.push('-ar', '48000')
+  else if (o.sampleRate && o.sampleRate !== 'keep') args.push('-ar', String(o.sampleRate))
   if (o.channels === 'mono') args.push('-ac', '1')
-  else if (o.channels === 'stereo') args.push('-ac', '2')
+  else if (o.channels === 'stereo' || target === 'opus') args.push('-ac', '2')
   return args
 }
 
@@ -124,7 +126,7 @@ export const toVideo = (target: 'mp4' | 'mov' | 'mkv' | 'webm'): ConverterFn => 
     codecArgs = ['-c', 'copy', ...(noAudio ? ['-an'] : [])]
     warnings.push('Streams were copied without re-encoding, so quality is identical to the original.')
   } else if (target === 'webm') {
-    codecArgs = ['-c:v', 'libvpx', '-crf', String(q.vp8), '-b:v', q.vp8Rate, '-deadline', 'realtime', '-cpu-used', '8', ...(noAudio ? ['-an'] : ['-c:a', 'libopus', '-b:a', '128k'])]
+    codecArgs = ['-c:v', 'libvpx', '-crf', String(q.vp8), '-b:v', q.vp8Rate, '-deadline', 'realtime', '-cpu-used', '8', ...(noAudio ? ['-an'] : ['-c:a', 'libvorbis', '-b:a', '128k'])]
   } else {
     codecArgs = ['-c:v', 'libx264', '-preset', ctx.caps.isMobile ? 'ultrafast' : 'veryfast', '-crf', String(q.x264), '-pix_fmt', 'yuv420p', ...(noAudio ? ['-an'] : ['-c:a', 'aac', '-b:a', '128k'])]
   }
@@ -149,7 +151,7 @@ export const toVideo = (target: 'mp4' | 'mov' | 'mkv' | 'webm'): ConverterFn => 
       out,
     ],
   })
-  if (!copy) warnings.push(target === 'webm' ? 'Encoded as VP8 video with Opus audio (VP9/AV1 are too slow in the browser).' : 'Encoded as H.264 video with AAC audio.')
+  if (!copy) warnings.push(target === 'webm' ? 'Encoded as VP8 video with Vorbis audio (VP9/AV1 are too slow in the browser).' : 'Encoded as H.264 video with AAC audio.')
   return finish(ctx, data, target, target === ctx.input.formatId ? '-converted' : '', warnings)
 }
 
@@ -190,7 +192,8 @@ export const videoThumbnail: ConverterFn = async (ctx) => {
     signal: ctx.signal,
     onLoading: (m) => ctx.onProgress({ stage: 'loading-engine', message: m }),
     onProgress: () => ctx.onProgress({ stage: 'processing', ratio: null, message: 'Grabbing frame' }),
-    buildArgs: (input) => ['-ss', String(at), '-i', input, '-frames:v', '1', '-q:v', '2', '/thumb.jpg'],
+    // Note: "-q:v" makes the WebAssembly MJPEG encoder hang, so the default quality is used.
+    buildArgs: (input) => ['-ss', String(at), '-i', input, '-frames:v', '1', '/thumb.jpg'],
   })
   return finish(ctx, data, 'jpeg', '-frame')
 }

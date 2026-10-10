@@ -13,12 +13,20 @@ async function mammoth(): Promise<Mammoth> {
   return (await import('mammoth/mammoth.browser')) as unknown as Mammoth
 }
 
+/** Word's Title/Subtitle styles are not headings by default in mammoth; map them so structure survives. */
+const STYLE_MAP = [
+  "p[style-name='Title'] => h1:fresh",
+  "p[style-name='Subtitle'] => h2:fresh",
+  "p[style-name='Quote'] => blockquote:fresh",
+  "p[style-name='Intense Quote'] => blockquote:fresh",
+]
+
 async function docxHtml(ctx: ConvertContext): Promise<{ html: string; warnings: string[] }> {
   ctx.onProgress({ stage: 'loading-engine', message: 'Loading Word reader' })
   const m = await mammoth()
   ctx.onProgress({ stage: 'processing', message: 'Reading document' })
   try {
-    const res = await m.convertToHtml({ arrayBuffer: await ctx.file.arrayBuffer() })
+    const res = await m.convertToHtml({ arrayBuffer: await ctx.file.arrayBuffer() }, { styleMap: STYLE_MAP })
     const html = await sanitizeHtml(res.value)
     const unrecognised = res.messages.filter((x) => x.type === 'warning').length
     const warnings = ['Converted by document structure (headings, paragraphs, lists, tables, images). Page layout, fonts, colours, headers and footers are not preserved.']

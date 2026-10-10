@@ -16,7 +16,15 @@ export async function getFFmpeg(onLoadingMessage?: (m: string) => void): Promise
     const ff = new FFmpeg()
     const base = `${location.origin}${import.meta.env.BASE_URL}vendor/ffmpeg`
     try {
-      await ff.load({ coreURL: `${base}/ffmpeg-core.js`, wasmURL: `${base}/ffmpeg-core.wasm` })
+      let coreURL = `${base}/ffmpeg-core.js`
+      let wasmURL = `${base}/ffmpeg-core.wasm`
+      if (import.meta.env.DEV) {
+        // Vite's dev server rewrites dynamic imports of /public files; blob URLs sidestep that locally.
+        const { toBlobURL } = await import('@ffmpeg/util')
+        coreURL = await toBlobURL(coreURL, 'text/javascript')
+        wasmURL = await toBlobURL(wasmURL, 'application/wasm')
+      }
+      await ff.load({ coreURL, wasmURL })
     } catch (e) {
       ff.terminate()
       throw new ConversionError(
