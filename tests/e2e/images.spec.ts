@@ -84,3 +84,17 @@ test.describe('image conversions', () => {
     expect(probe(out.path)[0].width).toBe(640)
   })
 })
+
+test('HEIC → JPEG decodes natively or with the libheif fallback', async ({ page }) => {
+  await page.goto('/')
+  await addFiles(page, ['photo.heic'])
+  const card = page.getByTestId('file-card').first()
+  await expect(card.getByTestId('detected-format')).toHaveText('HEIC')
+  await chooseTarget(page, 0, 'image-to-jpeg')
+  await convertAndWait(page)
+  await expect(card).toHaveAttribute('data-status', 'completed')
+  const out = await download(page, 0)
+  const [s] = probe(out.path)
+  expect(s.codec_name).toBe('mjpeg')
+  expect([s.width, s.height]).toEqual([480, 360])
+})

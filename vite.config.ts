@@ -49,7 +49,7 @@ export default defineConfig({
       workbox: {
         // The app shell and small engines are precached; large engines are cached on first use.
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,wasm}'],
-        globIgnores: ['**/vendor/**', '**/avif_enc*', '**/pdf.worker*', '**/ffmpeg*'],
+        globIgnores: ['**/vendor/**', '**/avif_enc*', '**/pdf.worker*', '**/ffmpeg*', '**/libheif*'],
         maximumFileSizeToCacheInBytes: 1024 * 1024,
         // Precache the app shell and the light image path only; larger engines are cached on first use.
         manifestTransforms: [

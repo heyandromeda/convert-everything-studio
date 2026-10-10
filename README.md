@@ -60,7 +60,7 @@ Status meanings:
 | several images | **One PDF** (a page per image) | pdf-lib | Supported | 2 images → 2-page PDF |
 
 All image conversions support resize (fit within, percentage, exact with aspect lock), compression presets or a quality slider, and lossless WebP. Re-encoding never copies EXIF/GPS. Orientation is applied.
-¹ AVIF input needs a browser that decodes AVIF (Safari 16+, Chrome, Firefox). ² HEIC input decodes **only in Safari** (iPhone, iPad, Mac); other browsers show a clear error. HEIC cannot be decoded in Chromium/Firefox, so it is not covered by automated tests.
+¹ AVIF input needs a browser that decodes AVIF (Safari 16+, Chrome, Firefox). ² HEIC is decoded natively by Safari; other browsers use a bundled [libheif](https://github.com/strukturag/libheif) WebAssembly build (LGPL-3.0, ~2 MB, loaded only for HEIC files). Verified HEIC→JPEG in Chromium, WebKit and Firefox.
 
 ### Documents
 
@@ -147,10 +147,10 @@ Options: bitrate, sample rate, mono/stereo, trim (start/end), remove tags; for v
 
 | Browser | Status |
 | --- | --- |
-| **iPhone / iPad Safari (iOS 16.4+)** | Primary target. Automated tests run in Playwright WebKit with iPhone 15 emulation; real-device testing is still needed (see below). HEIC decoding works only here. |
+| **iPhone / iPad Safari (iOS 16.4+)** | Primary target. Automated tests run in Playwright WebKit with iPhone 15 emulation; real-device testing is still needed (see below). HEIC decodes natively. |
 | Safari (macOS) | Same engine as iOS. |
-| Chrome / Edge (desktop and Android) | Fully tested (Chromium). No HEIC decoding. |
-| Firefox | Fully tested. No HEIC decoding. |
+| Chrome / Edge (desktop and Android) | Fully tested (Chromium). HEIC via libheif. |
+| Firefox | Fully tested. HEIC via libheif. |
 
 Notes for iPhone:
 - Safari cannot allocate canvases above about 16.7 megapixels. Larger images (for example 48 MP ProRAW-derived JPEGs) are scaled to fit, and the result says so.
@@ -226,6 +226,7 @@ LIVE_URL=https://your-preview.example LIVE_PASSWORD=optional npx playwright test
 
 - `dist/_headers` (Netlify / Cloudflare Pages): CSP with `frame-ancestors 'none'`, `nosniff`, `no-referrer`, a restrictive `Permissions-Policy`, and immutable caching for hashed assets.
 - `dist/vercel.json`: the same headers, for `vercel deploy dist`.
+- Root `vercel.json` (generated from `security-headers.mjs` by `node scripts/write-vercel-config.mjs`; a unit test keeps them in sync) for Git-based Vercel builds.
 - The CSP is also embedded as a `<meta>` tag, so it applies even on hosts that ignore header files.
 
 `netlify.toml` configures Git-based Netlify builds (`npm run build`, publish `dist`). No server-side code or functions exist in this project.
@@ -240,4 +241,5 @@ LIVE_URL=https://your-preview.example LIVE_PASSWORD=optional npx playwright test
 - AVIF encoding is slow on phones.
 - XLSX → CSV writes the last saved results of formulas; SheetJS does not recalculate.
 - 7Z/RAR, OCR, PPTX rendering, RTF/ODT/EPUB rendering and HEIC encoding are not available (see the table above).
+- libheif is LGPL-3.0. It is shipped as a separate, unmodified, dynamically loaded module (`libheif-js`), so it can be replaced independently of the app.
 - The main JS bundle is ~160 KB gzipped (React + UI). All engines are code-split and loaded on demand.

@@ -10,7 +10,7 @@ const alphaWarning = (target: string) => (input: DetectedFile): string[] =>
   input.metadata.image?.hasAlpha ? [`${target} does not support transparency. Transparent areas will be filled with the background colour.`] : []
 
 const heicNote = (input: DetectedFile, _o: OptionValues, caps: { isIOS: boolean }) =>
-  input.formatId === 'heic' && !caps.isIOS ? ['HEIC can only be decoded by Safari. Other browsers will report an error.'] : []
+  input.formatId === 'heic' && !caps.isIOS && !input.metadata.image?.width ? ['HEIC is decoded with the built-in libheif decoder in this browser, which is slower than Safari’s native decoder.'] : []
 
 const sameFormat = (fmt: string) => RASTER_IN.filter((f) => f !== fmt || ['png', 'jpeg', 'webp'].includes(f))
 

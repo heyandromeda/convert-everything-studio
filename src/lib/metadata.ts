@@ -156,7 +156,7 @@ export async function inspectMetadata(file: File, detected: Omit<DetectedFile, '
       case 'ico': {
         const dims = fmt === 'tiff' ? null : await imageDimsByDecode(file)
         meta.image = dims ? { ...dims } : {}
-        if (fmt === 'heic' && !dims) meta.notes = ['This browser cannot decode HEIC images, so they can only be converted in Safari.']
+        if (fmt === 'heic' && !dims) meta.notes = ['This browser cannot display HEIC itself, so the built-in HEIC decoder (about 2 MB) is used during conversion.']
         if (fmt === 'avif' && !dims) meta.notes = ['This browser cannot decode AVIF images.']
         if (fmt === 'ico' || fmt === 'avif') meta.image.hasAlpha = true
         break

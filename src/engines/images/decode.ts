@@ -131,14 +131,9 @@ export async function decodeImage(blob: Blob, formatId: string, caps: Capabiliti
   } catch (e) {
     if (e instanceof ConversionError) throw e
     if (formatId === 'heic') {
-      throw new ConversionError(
-        'codec-unavailable',
-        'HEIC decoding is unavailable in this browser',
-        caps.isIOS
-          ? 'Safari could not decode this HEIC image. It may use an unsupported HEIC variant.'
-          : 'Only Safari (iPhone, iPad and Mac) can decode HEIC images natively. This browser cannot.',
-        caps.isIOS ? 'Try exporting the photo as JPEG from the Photos app.' : 'Open this page in Safari, or export the photo as JPEG first.',
-      )
+      // Safari decodes HEIC natively; elsewhere (or for unusual variants) fall back to libheif.
+      const { decodeHeicWasm } = await import('./heic')
+      return decodeHeicWasm(blob, caps.maxCanvasPixels)
     }
     if (formatId === 'avif') {
       throw new ConversionError('codec-unavailable', 'AVIF decoding is unavailable in this browser', 'This browser cannot decode AVIF images.', 'Update the browser (Safari 16+, Chrome 85+, Firefox 93+).')

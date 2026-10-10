@@ -30,6 +30,7 @@
     "fflate": "^0.8.3",
     "gifenc": "^1.0.3",
     "html-to-pdfmake": "^2.5.35",
+    "libheif-js": "^1.23.5",
     "lucide-react": "^1.55.0",
     "mammoth": "^1.13.0",
     "marked": "^18.1.0",

@@ -42,3 +42,5 @@ declare module 'turndown-plugin-gfm' {
 
 declare module 'pdfmake/build/pdfmake'
 declare module 'pdfmake/build/vfs_fonts'
+
+declare module 'libheif-js/libheif-wasm/libheif-bundle.mjs'
