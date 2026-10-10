@@ -18,6 +18,8 @@ import { FormatIcon } from './FormatIcon'
 import { FormatPicker } from './FormatPicker'
 import { Notice } from './Notice'
 import { ResultRow } from './ResultRow'
+import { SourcePreview } from './SourcePreview'
+import { ArchiveEntryPicker } from './ArchiveEntryPicker'
 
 function metaLine(item: QueueItem): string[] {
   if (item.sources) return [formatBytes(item.sources.reduce((s, x) => s + x.file.size, 0)) + ' total']
@@ -39,6 +41,7 @@ function metaLine(item: QueueItem): string[] {
 export const FileCard = memo(function FileCard({ id }: { id: string }) {
   const item = useQueue((s) => s.items.find((i) => i.id === id))
   const [showOptions, setShowOptions] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(false)
   const caps = getCapabilities()
   const def = getConversion(item?.conversionId)
   const detectedInput = item?.detected
@@ -68,13 +71,20 @@ export const FileCard = memo(function FileCard({ id }: { id: string }) {
       aria-label={item.file.name}
     >
       <div className="flex items-start gap-3">
-        <div className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-muted ring-1 ring-border">
+        <button
+          type="button"
+          onClick={() => setPreviewOpen(true)}
+          disabled={!detected?.formatId || !!item.sources}
+          aria-label={`Preview ${item.file.name}`}
+          className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-muted ring-1 ring-border focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+        >
           {item.thumbUrl ? (
             <img src={item.thumbUrl} alt="" className="checkerboard size-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
           ) : (
-            <FormatIcon formatId={detected?.formatId} className="size-6 text-muted-foreground" />
+            <FormatIcon formatId={item.sources ? 'files' : detected?.formatId} className="size-6 text-muted-foreground" />
           )}
-        </div>
+        </button>
+        {detected?.formatId && !item.sources && <SourcePreview item={item} open={previewOpen} onOpenChange={setPreviewOpen} />}
         <div className="min-w-0 flex-1 pt-0.5">
           <p className="truncate text-[15px] leading-tight font-semibold" title={item.label ?? item.file.name}>{item.label ?? item.file.name}</p>
           {item.sources && (
@@ -149,6 +159,15 @@ export const FileCard = memo(function FileCard({ id }: { id: string }) {
               </Button>
             ) : null}
           </div>
+
+          {item.conversionId === 'archive-extract' && detected.metadata.archive?.entries && detected.metadata.archive.entries.length > 1 && (
+            <ArchiveEntryPicker
+              entries={detected.metadata.archive.entries}
+              selected={Array.isArray(item.options.entries) ? item.options.entries : []}
+              onChange={(paths) => setOptions(id, { entries: paths })}
+              disabled={busy}
+            />
+          )}
 
           {showOptions && def?.options && (
             <div className="space-y-4 rounded-2xl bg-muted/40 p-3.5">

@@ -72,13 +72,12 @@ export default function App() {
 
         <FileDropzone onFiles={onFiles} compact={hasItems} />
 
-        {hasItems && <BatchToolbar />}
-
         {hasItems ? (
           <section aria-label="Files" className="space-y-3">
             {itemIds.map((id) => (
               <FileCard key={id} id={id} />
             ))}
+            <BatchToolbar />
           </section>
         ) : (
           <QuickGuide onShowFormats={() => setCompatOpen(true)} />

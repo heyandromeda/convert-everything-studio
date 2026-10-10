@@ -119,10 +119,10 @@ export function FileDropzone({ onFiles, compact }: Props) {
         </p>
       </div>
       <div className="flex w-full max-w-sm flex-col gap-2.5 sm:flex-row">
-        <Button size="touch-lg" className="flex-1 bg-brand text-brand-foreground hover:bg-brand/90" onClick={() => inputRef.current?.click()}>
+        <Button size="touch-lg" className="w-full bg-brand text-brand-foreground hover:bg-brand/90 sm:w-auto sm:flex-1" onClick={() => inputRef.current?.click()}>
           <PlusIcon /> Browse files
         </Button>
-        <Button size="touch-lg" variant="secondary" className="flex-1" onClick={() => mediaRef.current?.click()}>
+        <Button size="touch-lg" variant="secondary" className="w-full sm:w-auto sm:flex-1" onClick={() => mediaRef.current?.click()}>
           <ImagePlusIcon /> Photos & videos
         </Button>
       </div>

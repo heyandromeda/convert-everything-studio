@@ -130,7 +130,6 @@ function describe(o: ConversionOption): string {
   else parts.push('Lossy or lossless')
   if (o.def.formatting === 'partial') parts.push('formatting partly preserved')
   if (o.def.formatting === 'none') parts.push('formatting not preserved')
-  if (o.def.cost === 'heavy') parts.push('slow on phones')
   const first = o.def.limitations[0]
   return [parts.join(' · '), first].filter(Boolean).join('. ')
 }
