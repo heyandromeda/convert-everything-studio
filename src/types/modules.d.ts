@@ -29,3 +29,16 @@ declare module 'html-to-pdfmake' {
   const htmlToPdfmake: (html: string, options?: Record<string, unknown>) => unknown
   export default htmlToPdfmake
 }
+
+declare module 'mammoth/mammoth.browser' {
+  const mammoth: unknown
+  export = mammoth
+}
+
+declare module 'turndown-plugin-gfm' {
+  import type TurndownService from 'turndown'
+  export const gfm: TurndownService.Plugin
+}
+
+declare module 'pdfmake/build/pdfmake'
+declare module 'pdfmake/build/vfs_fonts'

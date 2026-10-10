@@ -1,0 +1,4 @@
+Plain text document.
+Second line with accents: café résumé.
+
+New paragraph.

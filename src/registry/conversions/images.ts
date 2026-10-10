@@ -196,6 +196,7 @@ export const imageConversions: ConversionDef[] = [
     id: 'image-strip-metadata',
     from: ['jpeg', 'png', 'apng'],
     to: 'jpeg',
+    keepsInputFormat: true,
     label: 'Remove metadata (lossless)',
     description: 'Removes EXIF, GPS location, camera details and comments without re-compressing.',
     engine: 'jpeg-png-metadata',
@@ -210,8 +211,3 @@ export const imageConversions: ConversionDef[] = [
   },
 ]
 
-/** The metadata-removal entry targets the source's own format. */
-export function resolveTarget(def: ConversionDef, input: DetectedFile): string {
-  if (def.id === 'image-strip-metadata') return input.formatId === 'jpeg' ? 'jpeg' : 'png'
-  return def.to
-}

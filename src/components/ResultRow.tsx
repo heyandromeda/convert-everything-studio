@@ -18,7 +18,8 @@ export function ResultRow({ item, result, showDelta }: { item: QueueItem; result
   const [open, setOpen] = useState(false)
   const [compare, setCompare] = useState<'after' | 'before'>('after')
   const caps = getCapabilities()
-  const isImage = THUMBABLE.has(result.formatId)
+  const viewAs = result.previewAs ?? result.formatId
+  const isImage = THUMBABLE.has(viewAs)
   const canCompare = isImage && !!item.thumbUrl && item.detected?.formatId !== 'heic'
   const delta = showDelta ? describeSizeChange(item.file.size, result.blob.size) : ''
 
@@ -38,7 +39,7 @@ export function ResultRow({ item, result, showDelta }: { item: QueueItem; result
         {isImage ? (
           <img src={result.url} alt="" className="checkerboard size-full object-cover" />
         ) : (
-          <FormatIcon formatId={result.formatId} className="text-muted-foreground" />
+          <FormatIcon formatId={viewAs} className="text-muted-foreground" />
         )}
       </button>
       <div className="min-w-0 flex-1">
@@ -71,7 +72,7 @@ export function ResultRow({ item, result, showDelta }: { item: QueueItem; result
           <DialogHeader className="pr-8 text-left">
             <DialogTitle className="truncate">{result.name}</DialogTitle>
             <DialogDescription>
-              {formatLabel(result.formatId)} · {formatBytes(result.blob.size)}
+              {result.path && result.path !== result.name ? result.path : formatLabel(viewAs)} · {formatBytes(result.blob.size)}
               {showDelta && ` · original ${formatBytes(item.file.size)}`}
             </DialogDescription>
           </DialogHeader>
@@ -93,7 +94,7 @@ export function ResultRow({ item, result, showDelta }: { item: QueueItem; result
           {canCompare && compare === 'before' ? (
             <FilePreview blob={item.file} url={item.thumbUrl!} formatId={item.detected!.formatId!} name={item.file.name} zoomable />
           ) : (
-            <FilePreview blob={result.blob} url={result.url} formatId={result.formatId} name={result.name} zoomable />
+            <FilePreview blob={result.blob} url={result.url} formatId={viewAs} name={result.name} zoomable />
           )}
           {isImage && <p className="text-center text-[12px] text-muted-foreground">Tap the image to toggle actual size.</p>}
           <div className="flex gap-2">

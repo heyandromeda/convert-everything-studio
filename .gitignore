@@ -25,3 +25,4 @@ dist-ssr
 public/vendor/
 test-results/
 playwright-report/
+.netlify/

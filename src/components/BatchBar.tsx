@@ -36,7 +36,7 @@ export function BatchBar() {
       const done = useQueue.getState().items.filter((i) => i.status === 'completed')
       // Multi-file results (PDF pages, extracted archives) go in a folder named after their source.
       const files = done.flatMap((i) =>
-        i.results.map((r) => ({ blob: r.blob, name: r.name, folder: i.results.length > 1 ? safeFilename(baseName(i.file.name)) : undefined })),
+        i.results.map((r) => ({ blob: r.blob, name: r.path ?? r.name, folder: i.results.length > 1 ? safeFilename(baseName(i.file.name)) : undefined })),
       )
       const blob = await buildZip(files)
       const url = URL.createObjectURL(blob)

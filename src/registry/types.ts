@@ -56,6 +56,8 @@ interface BaseField {
   help?: string
   /** Only shown (and applied) when this returns true. */
   visible?: (values: OptionValues) => boolean
+  /** Restricts the field to these input format ids. */
+  appliesTo?: string[]
   advanced?: boolean
 }
 
@@ -202,6 +204,10 @@ export interface OutputFile {
   blob: Blob
   name: string
   formatId: string
+  /** Folder path inside a source archive, used when re-zipping results. */
+  path?: string
+  /** For generic extracted files: the format to use for previews only (never validated). */
+  previewAs?: string
   meta?: { width?: number; height?: number; pages?: number; duration?: number }
 }
 
@@ -226,6 +232,8 @@ export interface ConversionDef {
   id: string
   from: string[]
   to: string
+  /** The output keeps the input's format (e.g. metadata removal, re-encoding). `to` is then only nominal. */
+  keepsInputFormat?: boolean
   /** Overrides the target format label in the picker, e.g. "PNG pages". */
   label?: string
   description?: string

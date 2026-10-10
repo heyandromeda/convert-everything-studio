@@ -1,14 +1,32 @@
 import { formatLabel, getFormat } from './formats'
 import type { Availability, Capabilities, ConversionDef, DetectedFile } from './types'
-import { imageConversions, resolveTarget } from './conversions/images'
+import { imageConversions } from './conversions/images'
+import { documentConversions } from './conversions/documents'
+import { spreadsheetConversions } from './conversions/spreadsheets'
+import { dataConversions } from './conversions/data'
+import { archiveConversions, presentationConversions } from './conversions/archives'
+import { mediaConversions } from './conversions/media'
 import { UNSUPPORTED } from './unsupported'
 
-const ALL: ConversionDef[] = [...imageConversions]
+const ALL: ConversionDef[] = [
+  ...imageConversions,
+  ...documentConversions,
+  ...spreadsheetConversions,
+  ...dataConversions,
+  ...presentationConversions,
+  ...archiveConversions,
+  ...mediaConversions,
+]
 
 const byId = new Map<string, ConversionDef>()
 for (const d of ALL) {
   if (byId.has(d.id)) throw new Error(`Duplicate conversion id: ${d.id}`)
   byId.set(d.id, d)
+}
+
+export function resolveTarget(def: ConversionDef, input: DetectedFile): string {
+  if (def.keepsInputFormat && input.formatId) return input.formatId === 'apng' ? 'png' : input.formatId
+  return def.to
 }
 
 export function allConversions(): readonly ConversionDef[] {
@@ -65,8 +83,10 @@ export function defaultConversionFor(options: ConversionOption[], input: Detecte
     image: input.formatId === 'webp' ? ['image-to-png'] : input.formatId === 'heic' ? ['image-to-jpeg'] : ['image-to-webp', 'image-to-png'],
     video: ['video-to-mp4', 'video-to-webm'],
     audio: ['audio-to-mp3'],
-    document: [],
-    spreadsheet: [],
+    document: input.formatId === 'md' ? ['md-to-html'] : input.formatId === 'pdf' ? ['pdf-to-txt'] : input.formatId === 'docx' ? ['docx-to-pdf'] : ['txt-to-pdf', 'html-to-pdf'],
+    spreadsheet: input.formatId === 'csv' || input.formatId === 'tsv' ? ['sheet-to-xlsx'] : ['sheet-to-csv'],
+    data: input.formatId === 'json' ? ['sheet-to-csv', 'data-to-yaml'] : input.formatId === 'srt' ? ['subs-to-vtt'] : input.formatId === 'vtt' ? ['subs-to-srt'] : ['data-to-json'],
+    presentation: ['pptx-to-txt'],
     archive: ['archive-extract'],
   }
   for (const id of prefs[fmt?.category ?? ''] ?? []) {

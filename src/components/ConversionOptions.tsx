@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function ConversionOptions({ fields, values, input, onChange, disabled }: Props) {
-  const visible = fields.filter((f) => !f.visible || f.visible(values))
+  const visible = fields.filter((f) => (!f.visible || f.visible(values)) && (!f.appliesTo || f.appliesTo.includes(input.formatId ?? '')))
   if (!visible.length) return <p className="text-sm text-muted-foreground">This conversion has no settings.</p>
   return (
     <div className="grid gap-4 sm:grid-cols-2">
