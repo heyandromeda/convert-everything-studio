@@ -3,34 +3,7 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
-
-/**
- * connect-src 'self' is the key privacy guarantee: even if a dependency misbehaved,
- * the browser would refuse to send data to any other origin.
- */
-export const CSP = [
-  "default-src 'self'",
-  "script-src 'self' 'wasm-unsafe-eval'",
-  "worker-src 'self' blob:",
-  "connect-src 'self' blob: data:",
-  "img-src 'self' blob: data:",
-  "media-src 'self' blob:",
-  "style-src 'self' 'unsafe-inline'",
-  "font-src 'self' data:",
-  "frame-src 'self' blob: data:",
-  "object-src 'none'",
-  "base-uri 'none'",
-  "form-action 'none'",
-].join('; ')
-
-const SECURITY_HEADERS: Record<string, string> = {
-  'Content-Security-Policy': `${CSP}; frame-ancestors 'none'`,
-  'X-Content-Type-Options': 'nosniff',
-  'Referrer-Policy': 'no-referrer',
-  'X-Frame-Options': 'DENY',
-  'Cross-Origin-Opener-Policy': 'same-origin',
-  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()',
-}
+import { CSP, SECURITY_HEADERS, vercelConfig } from './security-headers.mjs'
 
 /** Injects the CSP meta tag and writes host header files (Netlify `_headers`, `vercel.json`). */
 function securityHeaders(): Plugin {
@@ -43,14 +16,8 @@ function securityHeaders(): Plugin {
       lines.push('/assets/*', '  Cache-Control: public, max-age=31536000, immutable')
       lines.push('/sw.js', '  Cache-Control: no-cache')
       this.emitFile({ type: 'asset', fileName: '_headers', source: lines.join('\n') + '\n' })
-      const vercel = {
-        headers: [
-          { source: '/(.*)', headers: Object.entries(SECURITY_HEADERS).map(([key, value]) => ({ key, value })) },
-          { source: '/assets/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
-          { source: '/sw.js', headers: [{ key: 'Cache-Control', value: 'no-cache' }] },
-        ],
-      }
-      this.emitFile({ type: 'asset', fileName: 'vercel.json', source: JSON.stringify(vercel, null, 2) })
+      const { headers } = vercelConfig()
+      this.emitFile({ type: 'asset', fileName: 'vercel.json', source: JSON.stringify({ headers }, null, 2) })
     },
   }
 }

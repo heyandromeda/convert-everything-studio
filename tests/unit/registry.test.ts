@@ -120,3 +120,15 @@ describe('options', () => {
     expect(deserializeOptions('{"x":{"nested":1},"ok":1}')).toEqual({ ok: 1 })
   })
 })
+
+describe('deployment config', () => {
+  it('root vercel.json matches the shared security headers', async () => {
+    const { readFileSync } = await import('node:fs')
+    const { vercelConfig } = await import('../../security-headers.mjs')
+    const onDisk = JSON.parse(readFileSync(new URL('../../vercel.json', import.meta.url), 'utf8'))
+    expect(onDisk).toEqual(vercelConfig())
+    const csp = onDisk.headers[0].headers.find((h: { key: string }) => h.key === 'Content-Security-Policy').value
+    expect(csp).toContain("connect-src 'self' blob: data:")
+    expect(csp).not.toMatch(/https?:/)
+  })
+})
