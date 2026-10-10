@@ -81,6 +81,11 @@ export const FORMATS: FormatDef[] = [
   f('7z', '7Z', 'archive', ['7z'], ['application/x-7z-compressed']),
   f('rar', 'RAR', 'archive', ['rar'], ['application/vnd.rar', 'application/x-rar-compressed']),
 
+  // Pseudo-formats for multi-file batch operations
+  f('image-set', 'Image set', 'other', [], ['application/octet-stream'], 'Several images combined in one operation'),
+  f('pdf-set', 'PDF set', 'other', [], ['application/octet-stream'], 'Several PDFs combined in one operation'),
+  f('file-set', 'File set', 'other', [], ['application/octet-stream'], 'Several files packed together'),
+
   // Pseudo-format for operations that emit several original files
   f('files', 'Extracted files', 'other', [], ['application/octet-stream'], 'Individual files from an archive or container'),
 ]

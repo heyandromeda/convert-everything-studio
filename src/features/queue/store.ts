@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { ErrorInfo } from '@/lib/errors'
-import type { DetectedFile, OptionValues, OutputFile } from '@/registry/types'
+import type { DetectedFile, OptionValues, OutputFile, SourceFile } from '@/registry/types'
 import { canTransition, type JobStatus } from './job-state'
 
 export interface ResultFile extends OutputFile {
@@ -26,6 +26,9 @@ export interface QueueItem {
   /** Incremented on every run so late updates from a superseded run are ignored. */
   runId: number
   thumbUrl?: string
+  /** Set for multi-file operations (combine into PDF, merge, ZIP). */
+  sources?: SourceFile[]
+  label?: string
 }
 
 interface QueueState {

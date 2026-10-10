@@ -11,7 +11,7 @@ import { baseName, formatBytes, safeFilename } from '@/lib/files'
 /** Sticky bottom bar: the primary action stays under the thumb on phones. */
 export function BatchBar() {
   const items = useQueue((s) => s.items)
-  const [zip, setZip] = useState<{ url: string; size: number; key: string } | null>(null)
+  const [zip, setZip] = useState<{ url: string; size: number; key: string; name: string } | null>(null)
   const [zipping, setZipping] = useState(false)
 
   const stats = useMemo(() => {
@@ -40,8 +40,9 @@ export function BatchBar() {
       )
       const blob = await buildZip(files)
       const url = URL.createObjectURL(blob)
-      setZip({ url, size: blob.size, key: stats.key })
-      triggerDownload(url, `converted-${new Date().toISOString().slice(0, 10)}.zip`)
+      const name = `converted-${new Date().toISOString().slice(0, 10)}.zip`
+      setZip({ url, size: blob.size, key: stats.key, name })
+      triggerDownload(url, name)
     } catch {
       toast.error('The ZIP could not be created. The results may be too large for this device; download them individually.')
     } finally {
@@ -82,7 +83,7 @@ export function BatchBar() {
           {stats.outputs.length > 1 && !stats.pending && (
             zipCurrent ? (
               <Button asChild size="touch-lg" variant="secondary" className="flex-1">
-                <a href={zipCurrent.url} download={`converted-${new Date().toISOString().slice(0, 10)}.zip`}>
+                <a href={zipCurrent.url} download={zipCurrent.name}>
                   <DownloadIcon /> ZIP · {formatBytes(zipCurrent.size)}
                 </a>
               </Button>

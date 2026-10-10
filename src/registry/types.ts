@@ -216,7 +216,14 @@ export interface ConvertResult {
   warnings?: string[]
 }
 
+export interface SourceFile {
+  file: File
+  input: DetectedFile
+}
+
 export interface ConvertContext {
+  /** For multi-file operations: every input, in queue order. */
+  sources?: SourceFile[]
   file: File
   baseName: string
   input: DetectedFile

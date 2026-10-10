@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils'
 import { conversionsFor, unsupportedNotesFor, type ConversionOption } from '@/registry'
 import { getFormat } from '@/registry/formats'
 import type { DetectedFile } from '@/registry/types'
-import { CATEGORY_LABEL, FormatIcon } from './FormatIcon'
+import { CATEGORY_LABEL } from './category-label'
+import { FormatIcon } from './FormatIcon'
 import { StatusBadge } from './StatusBadge'
 
 interface Props {

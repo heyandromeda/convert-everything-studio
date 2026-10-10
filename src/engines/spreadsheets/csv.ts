@@ -68,7 +68,13 @@ export function jsonToRows(data: unknown): { sheets: { name: string; rows: unkno
     if (arr.every((r) => r !== null && typeof r === 'object' && !Array.isArray(r))) {
       const keys: string[] = []
       const seen = new Set<string>()
-      for (const r of arr as Record<string, unknown>[]) for (const k of Object.keys(r)) if (!seen.has(k)) (seen.add(k), keys.push(k))
+      for (const r of arr as Record<string, unknown>[]) {
+        for (const k of Object.keys(r)) {
+          if (seen.has(k)) continue
+          seen.add(k)
+          keys.push(k)
+        }
+      }
       return [keys, ...(arr as Record<string, unknown>[]).map((r) => keys.map((k) => flattenValue(r[k])))]
     }
     if (arr.every((r) => r === null || typeof r !== 'object')) return [['value'], ...arr.map((v) => [v])]

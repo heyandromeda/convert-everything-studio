@@ -20,6 +20,7 @@ import { Notice } from './Notice'
 import { ResultRow } from './ResultRow'
 
 function metaLine(item: QueueItem): string[] {
+  if (item.sources) return [formatBytes(item.sources.reduce((s, x) => s + x.file.size, 0)) + ' total']
   const m = item.detected?.metadata
   const parts: string[] = [formatBytes(item.file.size)]
   if (m?.image?.width && m.image.height) parts.push(`${m.image.width}×${m.image.height}`)
@@ -40,9 +41,11 @@ export const FileCard = memo(function FileCard({ id }: { id: string }) {
   const [showOptions, setShowOptions] = useState(false)
   const caps = getCapabilities()
   const def = getConversion(item?.conversionId)
+  const detectedInput = item?.detected
+  const options = item?.options
   const warnings = useMemo(
-    () => (item?.detected && def?.warnings ? def.warnings(item.detected, item.options, caps) : []),
-    [item?.detected, item?.options, def, caps],
+    () => (detectedInput && options && def?.warnings ? def.warnings(detectedInput, options, caps) : []),
+    [detectedInput, options, def, caps],
   )
   if (!item) return null
 
@@ -60,6 +63,7 @@ export const FileCard = memo(function FileCard({ id }: { id: string }) {
         status === 'completed' && 'border-success/30',
       )}
       data-testid="file-card"
+      data-item-id={id}
       data-status={status}
       aria-label={item.file.name}
     >
@@ -72,7 +76,10 @@ export const FileCard = memo(function FileCard({ id }: { id: string }) {
           )}
         </div>
         <div className="min-w-0 flex-1 pt-0.5">
-          <p className="truncate text-[15px] leading-tight font-semibold" title={item.file.name}>{item.file.name}</p>
+          <p className="truncate text-[15px] leading-tight font-semibold" title={item.label ?? item.file.name}>{item.label ?? item.file.name}</p>
+          {item.sources && (
+            <p className="mt-0.5 truncate text-[12.5px] text-muted-foreground">{item.sources.map((s) => s.file.name).join(', ')}</p>
+          )}
           <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-muted-foreground">
             {status === 'detecting' ? (
               <span className="inline-flex items-center gap-1.5"><Loader2Icon className="size-3.5 animate-spin" /> Inspecting…</span>
@@ -211,7 +218,7 @@ export const FileCard = memo(function FileCard({ id }: { id: string }) {
               )}
               <div className="space-y-2">
                 {item.results.slice(0, 60).map((r) => (
-                  <ResultRow key={r.url} item={item} result={r} showDelta={item.results.length === 1} />
+                  <ResultRow key={r.url} item={item} result={r} showDelta={item.results.length === 1 && !item.sources} />
                 ))}
               </div>
               {item.results.length > 60 && (

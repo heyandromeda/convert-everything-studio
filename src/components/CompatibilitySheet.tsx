@@ -5,7 +5,7 @@ import { allConversions } from '@/registry'
 import { formatLabel, getFormat } from '@/registry/formats'
 import type { Category } from '@/registry/types'
 import { UNSUPPORTED } from '@/registry/unsupported'
-import { CATEGORY_LABEL } from './FormatIcon'
+import { CATEGORY_LABEL } from './category-label'
 import { StatusBadge } from './StatusBadge'
 
 const ENGINE_LABEL: Record<string, string> = {

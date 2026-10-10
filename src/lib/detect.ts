@@ -26,8 +26,8 @@ const ALIASES: Record<string, string[]> = {
   xml: ['svg', 'html'],
 }
 
-export function isAlias(a: string, b: string) {
-  return a === b || ALIASES[a]?.includes(b) || ALIASES[b]?.includes(a)
+export function isAlias(a: string, b: string): boolean {
+  return a === b || !!ALIASES[a]?.includes(b) || !!ALIASES[b]?.includes(a)
 }
 
 /** Identify a format purely from leading bytes. Returns null when no binary signature matches. */

@@ -6,6 +6,7 @@ import { spreadsheetConversions } from './conversions/spreadsheets'
 import { dataConversions } from './conversions/data'
 import { archiveConversions, presentationConversions } from './conversions/archives'
 import { mediaConversions } from './conversions/media'
+import { combineConversions } from './conversions/combine'
 import { UNSUPPORTED } from './unsupported'
 
 const ALL: ConversionDef[] = [
@@ -16,6 +17,7 @@ const ALL: ConversionDef[] = [
   ...presentationConversions,
   ...archiveConversions,
   ...mediaConversions,
+  ...combineConversions,
 ]
 
 const byId = new Map<string, ConversionDef>()

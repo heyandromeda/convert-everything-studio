@@ -3,6 +3,7 @@ import { LayoutGridIcon, SettingsIcon, ShieldCheckIcon, WifiOffIcon } from 'luci
 import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
 import { BatchBar } from '@/components/BatchBar'
+import { BatchToolbar } from '@/components/BatchToolbar'
 import { CompatibilitySheet } from '@/components/CompatibilitySheet'
 import { FileCard } from '@/components/FileCard'
 import { FileDropzone } from '@/components/FileDropzone'
@@ -70,6 +71,8 @@ export default function App() {
         </p>
 
         <FileDropzone onFiles={onFiles} compact={hasItems} />
+
+        {hasItems && <BatchToolbar />}
 
         {hasItems ? (
           <section aria-label="Files" className="space-y-3">

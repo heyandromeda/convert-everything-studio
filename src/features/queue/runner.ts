@@ -131,6 +131,39 @@ export function setTargetForAll(category: string, conversionId: string): number 
   return count
 }
 
+const SET_LABEL: Record<string, (n: number) => string> = {
+  'image-set': (n) => `${n} images`,
+  'pdf-set': (n) => `${n} PDFs`,
+  'file-set': (n) => `${n} files`,
+}
+
+/** Creates a queue item that operates on several files at once and returns its id. */
+export function createCombined(setFormat: 'image-set' | 'pdf-set' | 'file-set', ids: string[], conversionId: string): string | null {
+  const items = getState().items.filter((i) => ids.includes(i.id) && i.detected && !i.sources)
+  const def = getConversion(conversionId)
+  if (items.length < 2 || !def) return null
+  const label = SET_LABEL[setFormat](items.length)
+  const id = newId()
+  getState().add([
+    {
+      id,
+      file: new File([], label),
+      label,
+      addedAt: Date.now(),
+      detected: { formatId: setFormat, source: 'content', extension: '', mime: '', metadata: {} },
+      sources: items.map((i) => ({ file: i.file, input: i.detected! })),
+      conversionId,
+      options: { ...defaultOptions(def.options), ...loadPreferredOptions(conversionId) },
+      status: 'ready',
+      progress: null,
+      results: [],
+      warnings: [],
+      runId: 0,
+    },
+  ])
+  return id
+}
+
 export function convert(ids?: string[]) {
   const targets = getState().items.filter(
     (it) => (!ids || ids.includes(it.id)) && it.conversionId && ['ready', 'failed', 'canceled'].includes(it.status),
@@ -231,6 +264,7 @@ async function run(id: string) {
     }
 
     const result = await fn({
+      sources: item.sources,
       file: item.file,
       baseName: baseName(item.file.name),
       input: item.detected,
