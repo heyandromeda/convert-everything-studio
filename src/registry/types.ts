@@ -43,6 +43,7 @@ export type EngineId =
   | 'fflate'
   | 'tar-reader'
   | 'ffmpeg-wasm'
+  | 'libarchive-wasm'
   | 'ooxml-reader'
 
 export type Cost = 'light' | 'medium' | 'heavy'

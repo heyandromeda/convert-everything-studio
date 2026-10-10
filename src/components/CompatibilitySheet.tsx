@@ -29,6 +29,7 @@ const ENGINE_LABEL: Record<string, string> = {
   fflate: 'fflate',
   'tar-reader': 'Built-in TAR reader',
   'ffmpeg-wasm': 'FFmpeg (WebAssembly)',
+  'libarchive-wasm': 'libarchive (WebAssembly)',
   'ooxml-reader': 'Built-in OOXML reader',
 }
 

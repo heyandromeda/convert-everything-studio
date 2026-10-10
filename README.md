@@ -109,6 +109,8 @@ CSV input: auto delimiter detection, quoted fields and embedded newlines, select
 | From | To | Status | Notes |
 | --- | --- | --- | --- |
 | ZIP, TAR, TAR.GZ, GZIP | Extract files (all or selected) | Supported | path traversal (`../`), absolute paths and reserved names are neutralised; symlinks skipped; size, file-count and ratio limits stop decompression bombs; extracted files are never opened |
+| 7Z | Extract files (all or selected) | Supported | libarchive (WebAssembly, MIT, ~1 MB on first use); same safety limits; verified in all three browsers |
+| RAR | Extract files | Experimental | libarchive; RAR 4 fully, RAR 5 partially; no automated test because no free RAR encoder exists to create fixtures |
 | TAR, TAR.GZ | ZIP (repacked) | Supported | |
 | Text, PDF, TAR, WAV, BMP, TIFF… | GZIP | Supported | |
 | any files | ZIP of originals | Supported | |
@@ -137,7 +139,6 @@ Options: bitrate, sample rate, mono/stereo, trim (start/end), remove tags; for v
 | DOC, XLS*, PPT (97–2003 binary) | Need a full Office engine. *XLS is supported through SheetJS. |
 | RTF, ODT, EPUB, ODP rendering | No reliable bundled renderer yet. |
 | Keynote, Numbers | Proprietary format. |
-| 7Z, RAR | Need an additional WASM engine (not bundled yet). |
 | OCR for scanned PDFs | Not included; the app detects scanned PDFs and says so. |
 | H.265/VP9/AV1 encoding | Too slow single-threaded in WebAssembly to be useful. |
 
@@ -240,6 +241,6 @@ LIVE_URL=https://your-preview.example LIVE_PASSWORD=optional npx playwright test
 - Single-threaded FFmpeg is slow for long or high-resolution video, especially on phones. Copy-streams mode avoids re-encoding when the codecs fit the container.
 - AVIF encoding is slow on phones.
 - XLSX → CSV writes the last saved results of formulas; SheetJS does not recalculate.
-- 7Z/RAR, OCR, PPTX rendering, RTF/ODT/EPUB rendering and HEIC encoding are not available (see the table above).
+- OCR, PPTX rendering, RTF/ODT/EPUB rendering and HEIC encoding are not available (see the table above).
 - libheif is LGPL-3.0. It is shipped as a separate, unmodified, dynamically loaded module (`libheif-js`), so it can be replaced independently of the app.
 - The main JS bundle is ~160 KB gzipped (React + UI). All engines are code-split and loaded on demand.

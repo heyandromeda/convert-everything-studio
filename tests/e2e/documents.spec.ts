@@ -218,3 +218,24 @@ test('archive: extract only selected entries; spreadsheet source preview', async
   await expect(card).toHaveAttribute('data-status', 'completed')
   await expect(card.getByTestId('result-row')).toHaveCount(2)
 })
+
+test('7z extraction with libarchive', async ({ page }) => {
+  await addFiles(page, ['bundle.7z'])
+  const card = page.getByTestId('file-card').first()
+  await expect(card.getByTestId('detected-format')).toHaveText('7Z')
+  await expect(card).toContainText('3 files')
+  await chooseTarget(page, 0, 'archive-extract-7z')
+  await convertAndWait(page)
+  await expect(card).toHaveAttribute('data-status', 'completed')
+  await expect(card.getByTestId('result-row')).toHaveCount(3)
+  const names: string[] = []
+  const contents: Record<string, Buffer> = {}
+  for (let i = 0; i < 3; i++) {
+    const d = await download(page, 0, i)
+    names.push(d.name)
+    contents[d.name] = d.bytes
+  }
+  expect(names.sort()).toEqual(['alpha.png', 'hello.txt', 'inner.md'])
+  expect(contents['hello.txt'].toString()).toBe('seven zip text\n')
+  expect(ascii(contents['alpha.png'], 1, 3)).toBe('PNG')
+})

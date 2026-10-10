@@ -13,6 +13,8 @@ const copies = [
   ['node_modules/pdfjs-dist/cmaps', 'pdfjs/cmaps'],
   ['node_modules/pdfjs-dist/standard_fonts', 'pdfjs/standard_fonts'],
   ['node_modules/pdfjs-dist/wasm', 'pdfjs/wasm'],
+  ['node_modules/libarchive.js/dist/worker-bundle.js', 'libarchive/worker-bundle.js'],
+  ['node_modules/libarchive.js/dist/libarchive.wasm', 'libarchive/libarchive.wasm'],
 ]
 
 rmSync(vendor, { recursive: true, force: true })

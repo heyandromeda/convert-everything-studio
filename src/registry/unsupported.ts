@@ -51,9 +51,4 @@ export const UNSUPPORTED: UnsupportedNote[] = [
     to: 'Any format',
     reason: 'Apple iWork files use a proprietary format. Export to PPTX/XLSX from Keynote or Numbers first.',
   },
-  {
-    from: ['7z', 'rar'],
-    to: 'Extract',
-    reason: '7-Zip and RAR extraction need a separate WebAssembly engine that is not bundled yet.',
-  },
 ]

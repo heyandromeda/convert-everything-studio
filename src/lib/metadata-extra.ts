@@ -61,6 +61,16 @@ export async function inspectExtra(file: File, fmt: string): Promise<FileMetadat
         notes: entries.some((e) => e.unsafe) ? ['Some entries have unsafe paths (for example "../"). They will be extracted with safe names.'] : undefined,
       }
     }
+    case '7z':
+    case 'rar': {
+      if (file.size > (caps.isMobile ? 300 : 1500) * MB) return {}
+      const { listLibarchive } = await import('@/engines/archives/libarchive')
+      const entries = await listLibarchive(file)
+      return {
+        archive: { entryCount: entries.length, totalSize: entries.reduce((s, e) => s + e.size, 0), entries: entries.slice(0, 2000), truncated: entries.length > 2000 },
+        notes: entries.some((e) => e.unsafe) ? ['Some entries have unsafe paths (for example "../"). They will be extracted with safe names.'] : undefined,
+      }
+    }
     default:
       return {}
   }

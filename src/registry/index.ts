@@ -89,7 +89,7 @@ export function defaultConversionFor(options: ConversionOption[], input: Detecte
     spreadsheet: input.formatId === 'csv' || input.formatId === 'tsv' ? ['sheet-to-xlsx'] : ['sheet-to-csv'],
     data: input.formatId === 'json' ? ['sheet-to-csv', 'data-to-yaml'] : input.formatId === 'srt' ? ['subs-to-vtt'] : input.formatId === 'vtt' ? ['subs-to-srt'] : ['data-to-json'],
     presentation: ['pptx-to-txt'],
-    archive: ['archive-extract'],
+    archive: ['archive-extract', 'archive-extract-7z', 'archive-extract-rar'],
   }
   for (const id of prefs[fmt?.category ?? ''] ?? []) {
     const m = usable.find((o) => o.def.id === id && o.target !== input.formatId)

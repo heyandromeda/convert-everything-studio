@@ -160,7 +160,7 @@ export const FileCard = memo(function FileCard({ id }: { id: string }) {
             ) : null}
           </div>
 
-          {item.conversionId === 'archive-extract' && detected.metadata.archive?.entries && detected.metadata.archive.entries.length > 1 && (
+          {item.conversionId?.startsWith('archive-extract') && detected.metadata.archive?.entries && detected.metadata.archive.entries.length > 1 && (
             <ArchiveEntryPicker
               entries={detected.metadata.archive.entries}
               selected={Array.isArray(item.options.entries) ? item.options.entries : []}
