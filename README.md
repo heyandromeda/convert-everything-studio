@@ -231,7 +231,7 @@ LIVE_URL=https://your-preview.example LIVE_PASSWORD=optional npx playwright test
 - Root `vercel.json` (generated from `security-headers.mjs` by `node scripts/write-vercel-config.mjs`; a unit test keeps them in sync) for Git-based Vercel builds.
 - The CSP is also embedded as a `<meta>` tag, so it applies even on hosts that ignore header files.
 
-**Vercel (current preview host):** `npm run deploy:preview` builds locally and uploads a preview deployment with the Vercel CLI (after `vercel login` and `vercel link`). The project has Vercel Authentication and the preview feedback toolbar turned off: the toolbar injects a third-party script, which the e2e cross-origin guard flags.
+**Vercel (current preview host):** `npm run deploy:preview` builds locally, uploads a preview deployment with the Vercel CLI (after `vercel login` and `vercel link`), and points the stable preview address at that deployment: https://convert-everything-preview.vercel.app. It does not publish a production release. The project has Vercel Authentication and the preview feedback toolbar turned off: the toolbar injects a third-party script, which the e2e cross-origin guard flags.
 
 `netlify.toml` configures Git-based Netlify builds (`npm run build`, publish `dist`). No server-side code or functions exist in this project.
 

@@ -95,6 +95,13 @@ export function SettingsSheet({ open, onOpenChange, theme, onTheme }: Props) {
             <p>Converted files exist only in memory until you download them or close the tab.</p>
           </section>
 
+          <section className="space-y-2 text-[13.5px] leading-relaxed text-muted-foreground">
+            <h3 className="text-sm font-semibold text-foreground">On iPhone</h3>
+            <p>In Safari, tap Share, then Add to Home Screen. Convert Everything opens from your Home Screen without the browser toolbar.</p>
+            <p>Downloads go to Files → Downloads. To save a picture to Photos, tap Share, then Save Image.</p>
+            <p>Video conversion runs on this phone. Keep Safari in the foreground, and leave the screen on, until it finishes.</p>
+          </section>
+
           <section className="space-y-1 text-[12.5px] text-muted-foreground">
             <h3 className="text-sm font-semibold text-foreground">This browser</h3>
             <p>WebAssembly: {caps.webAssembly ? 'available' : 'unavailable'}</p>
