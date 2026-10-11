@@ -1,5 +1,6 @@
 import { ConversionError } from '@/lib/errors'
 import { outputName, safeFilename } from '@/lib/files'
+import { parseJsonText } from '@/lib/parse-error'
 import { mimeFor } from '@/registry/formats'
 import type { ConvertContext, ConverterFn, OutputFile } from '@/registry/types'
 import { decodeText } from '../documents/html'
@@ -30,12 +31,7 @@ async function parseDelimited(ctx: ConvertContext, X: XLSXModule): Promise<{ wb:
 }
 
 async function parseJson(ctx: ConvertContext, X: XLSXModule): Promise<{ wb: WorkBook; warnings: string[] }> {
-  let data: unknown
-  try {
-    data = JSON.parse((await ctx.file.text()).replace(/^\uFEFF/, ''))
-  } catch (e) {
-    throw new ConversionError('corrupt', 'This JSON is not valid', e instanceof Error ? e.message.slice(0, 160) : 'Parse error.')
-  }
+  const data = parseJsonText((await ctx.file.text()).replace(/^\uFEFF/, ''))
   const shaped = jsonToRows(data)
   if (!shaped) {
     throw new ConversionError('not-tabular', 'This JSON is not a table', 'Spreadsheet export needs an array of objects, an array of arrays, or an object whose values are such arrays.', 'Nested JSON can be converted to YAML or XML instead.')

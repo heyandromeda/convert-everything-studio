@@ -42,7 +42,7 @@ export default function App() {
 
   return (
     <div className="min-h-dvh bg-background text-foreground">
-      <main className={`mx-auto w-[min(100%-2rem,700px)] pt-[max(env(safe-area-inset-top),3rem)] ${hasItems ? 'pb-44' : 'pb-12'}`}>
+      <main className={`mx-auto w-[min(100%-2rem,700px)] pt-[max(env(safe-area-inset-top),3rem)] ${hasItems ? 'pb-[calc(env(safe-area-inset-bottom)+15rem)]' : 'pb-12'}`}>
         <div className="mb-2 flex items-start justify-between gap-3">
           <p className="pt-2 text-xs tracking-[0.08em] text-[#666] uppercase dark:text-[#aaa]">Local utility</p>
           <div className="flex gap-2">

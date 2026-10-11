@@ -5,6 +5,9 @@ export interface ZipDirectoryEntry extends ArchiveEntry {
   localHeaderOffset: number
   method: number
   encrypted: boolean
+  crc32: number
+  /** The name exactly as fflate decodes it (Latin-1 unless the UTF-8 flag is set). */
+  rawName: string
 }
 
 const EOCD_SIG = 0x06054b50
@@ -54,6 +57,7 @@ export async function readZipDirectory(blob: Blob, maxEntries = 20000): Promise<
     if (dv.getUint32(p, true) !== CEN_SIG) break
     const flags = dv.getUint16(p + 8, true)
     const method = dv.getUint16(p + 10, true)
+    const crc = dv.getUint32(p + 16, true)
     let compressedSize = dv.getUint32(p + 20, true)
     let uncompressedSize = dv.getUint32(p + 24, true)
     const nameLen = dv.getUint16(p + 28, true)
@@ -87,6 +91,8 @@ export async function readZipDirectory(blob: Blob, maxEntries = 20000): Promise<
       localHeaderOffset,
       method,
       encrypted: (flags & 1) === 1,
+      crc32: crc,
+      rawName: flags & 0x800 ? name : String.fromCharCode(...nameBytes),
     })
     p += 46 + nameLen + extraLen + commentLen
   }

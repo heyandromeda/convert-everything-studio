@@ -94,9 +94,14 @@ export function classifyError(err: unknown): ErrorInfo {
   return {
     code: 'unknown',
     title: 'The conversion did not complete',
-    detail: truncate(message || 'An unexpected error occurred in the conversion engine.', 200),
+    detail: truncate(redactQuoted(message) || 'An unexpected error occurred in the conversion engine.', 200),
     suggestion: 'Try again. If it keeps failing, try a different output format.',
   }
+}
+
+/** Library messages sometimes quote input text; quoted spans are replaced so file contents never reach the screen. */
+export function redactQuoted(message: string): string {
+  return message.replace(/(["'`“‘])(?:(?!\1)[^\n]){2,}?(?:\1|[”’])/g, '“…”').split('\n')[0]
 }
 
 function truncate(s: string, n: number) {

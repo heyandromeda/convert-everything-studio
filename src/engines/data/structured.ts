@@ -1,5 +1,6 @@
 import { ConversionError } from '@/lib/errors'
 import { outputName } from '@/lib/files'
+import { parseJsonText, syntaxError } from '@/lib/parse-error'
 import { mimeFor } from '@/registry/formats'
 import type { ConvertContext, ConverterFn } from '@/registry/types'
 
@@ -8,15 +9,8 @@ const textOut = (ctx: ConvertContext, text: string, formatId: string, warnings: 
   warnings,
 })
 
-const parseError = (fmt: string, e: unknown) =>
-  new ConversionError('corrupt', `This ${fmt} is not valid`, e instanceof Error ? e.message.split('\n')[0].slice(0, 200) : 'It could not be parsed.', 'Fix the syntax error and try again.')
-
 async function readJson(ctx: ConvertContext): Promise<unknown> {
-  try {
-    return JSON.parse((await ctx.file.text()).replace(/^\uFEFF/, ''))
-  } catch (e) {
-    throw parseError('JSON', e)
-  }
+  return parseJsonText((await ctx.file.text()).replace(/^\uFEFF/, ''))
 }
 
 async function readYaml(ctx: ConvertContext): Promise<unknown> {
@@ -25,7 +19,8 @@ async function readYaml(ctx: ConvertContext): Promise<unknown> {
     // Aliases are capped to defuse "billion laughs" style expansion.
     return YAML.parse(await ctx.file.text(), { maxAliasCount: 100, prettyErrors: true })
   } catch (e) {
-    throw parseError('YAML', e)
+    const pos = (e as { linePos?: { line: number; col: number }[] }).linePos?.[0]
+    throw syntaxError('YAML', pos)
   }
 }
 
@@ -33,7 +28,7 @@ async function readXml(ctx: ConvertContext): Promise<unknown> {
   const { XMLParser, XMLValidator } = await import('fast-xml-parser')
   const xml = await ctx.file.text()
   const valid = XMLValidator.validate(xml)
-  if (valid !== true) throw parseError('XML', new Error(`${valid.err.msg} (line ${valid.err.line})`))
+  if (valid !== true) throw syntaxError('XML', { line: valid.err.line, col: valid.err.col })
   // processEntities stays limited to the predefined XML entities; DOCTYPE entities are never expanded.
   const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_', parseTagValue: ctx.options.parseValues !== false, processEntities: true, htmlEntities: false, ignoreDeclaration: true, ignorePiTags: true })
   return parser.parse(xml)

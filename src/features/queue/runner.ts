@@ -42,6 +42,12 @@ async function inspect(id: string) {
   const item = getItem(id)
   if (!item) return
   const caps = getCapabilities()
+  if (item.file.size === 0 && !item.sources) {
+    getState().transition(id, 'unsupported', {
+      detected: { formatId: null, source: 'none', extension: '', mime: item.file.type, metadata: { notes: ['This file is empty (0 bytes), so there is nothing to convert.'] } },
+    })
+    return
+  }
   try {
     const base = await detectFile(item.file)
     const metadata = await inspectMetadata(item.file, base)

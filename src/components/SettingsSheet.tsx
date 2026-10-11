@@ -35,7 +35,7 @@ export function SettingsSheet({ open, onOpenChange, theme, onTheme }: Props) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full gap-0 p-0 sm:max-w-md">
+      <SheetContent side="right" className="w-full max-w-none gap-0 p-0 data-[side=right]:w-full sm:max-w-md sm:data-[side=right]:max-w-md">
         <SheetHeader className="border-b px-5 pt-[max(env(safe-area-inset-top),1.25rem)] pb-4">
           <SheetTitle>Settings & privacy</SheetTitle>
           <SheetDescription>Stored only on this device.</SheetDescription>

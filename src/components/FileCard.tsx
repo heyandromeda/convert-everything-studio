@@ -6,6 +6,7 @@ import { isActive, isPending, STATUS_LABEL } from '@/features/queue/job-state'
 import { applyToCompatible, cancel, convert, removeItem, setConversion, setOptions } from '@/features/queue/runner'
 import type { QueueItem } from '@/features/queue/store'
 import { useQueue } from '@/features/queue/store'
+import { useArmed } from '@/hooks/use-armed'
 import { getCapabilities } from '@/lib/capabilities'
 import { describeDetection } from '@/lib/detect'
 import { formatBytes, formatDuration } from '@/lib/files'
@@ -38,6 +39,15 @@ function metaLine(item: QueueItem): string[] {
   return parts
 }
 
+function StopButton({ onStop }: { onStop: () => void }) {
+  const armed = useArmed()
+  return (
+    <Button variant="outline" size="touch" className="shrink-0 scroll-mb-60" onClick={onStop} disabled={!armed}>
+      <SquareIcon className="size-3.5" /> Stop
+    </Button>
+  )
+}
+
 export const FileCard = memo(function FileCard({ id }: { id: string }) {
   const item = useQueue((s) => s.items.find((i) => i.id === id))
   const [showOptions, setShowOptions] = useState(false)
@@ -61,7 +71,7 @@ export const FileCard = memo(function FileCard({ id }: { id: string }) {
   return (
     <article
       className={cn(
-        'rounded-[4px] border bg-card p-4 transition-colors',
+        'scroll-mb-60 rounded-[4px] border bg-card p-4 transition-colors',
         status === 'failed' && 'border-destructive/40',
         status === 'completed' && 'border-success/30',
       )}
@@ -128,7 +138,7 @@ export const FileCard = memo(function FileCard({ id }: { id: string }) {
         <Notice key={n} tone="info" className="mt-3">{n}</Notice>
       ))}
 
-      {status === 'unsupported' && (
+      {status === 'unsupported' && item.file.size > 0 && (
         <div className="mt-3 space-y-2">
           <Notice tone="warning" title={detected?.formatId ? `No conversions available for ${fmt?.label ?? 'this format'} yet` : 'This file type was not recognised'}>
             {detected?.formatId
@@ -201,9 +211,7 @@ export const FileCard = memo(function FileCard({ id }: { id: string }) {
                   <ConversionProgress status={status} progress={item.progress} message={item.progressMessage} />
                 )}
               </div>
-              <Button variant="outline" size="touch" className="shrink-0" onClick={() => cancel(id)}>
-                <SquareIcon className="size-3.5" /> Stop
-              </Button>
+              <StopButton onStop={() => cancel(id)} />
             </div>
           ) : null}
 

@@ -1,4 +1,5 @@
 import { archiveLimits, checkArchiveBudget, sanitizeArchivePath } from '@/lib/archive-safety'
+import { crc32 } from '@/lib/crc32'
 import { ConversionError, throwIfAborted } from '@/lib/errors'
 import { baseName, outputName, safeFilename } from '@/lib/files'
 import { formatFromFilename } from '@/registry/formats'
@@ -62,7 +63,7 @@ async function extractZip(ctx: ConvertContext): Promise<OutputFile[]> {
   const { unzip } = await import('fflate')
   const data = new Uint8Array(await ctx.file.arrayBuffer())
   throwIfAborted(ctx.signal)
-  const declared = new Map(wanted.map((e) => [e.path, e.size]))
+  const declared = new Map(wanted.map((e) => [e.path, e]))
   const files = await new Promise<Record<string, Uint8Array>>((resolve, reject) =>
     unzip(
       data,
@@ -75,6 +76,21 @@ async function extractZip(ctx: ConvertContext): Promise<OutputFile[]> {
       (err, out) => (err ? reject(new ConversionError('corrupt', 'The ZIP data is damaged', 'One or more entries could not be decompressed.')) : resolve(out)),
     ),
   )
+  throwIfAborted(ctx.signal)
+  // fflate trusts the declared size and never checks the CRC, so a damaged or forged entry
+  // would otherwise come out silently truncated or wrong.
+  const byRawName = new Map(wanted.map((e) => [e.rawName, e]))
+  for (const [name, bytes] of Object.entries(files)) {
+    const entry = byRawName.get(name)
+    if (!entry || bytes.length !== entry.size || crc32(bytes) !== entry.crc32) {
+      throw new ConversionError(
+        'corrupt',
+        'The ZIP data is damaged',
+        'A file inside the archive does not match its recorded size or checksum, so nothing was extracted.',
+        'Try re-downloading the archive or re-creating it.',
+      )
+    }
+  }
   return Object.entries(files).map(([name, bytes]) => entryOutput(sanitizeArchivePath(name).path, bytes))
 }
 

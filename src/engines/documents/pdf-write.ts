@@ -1,4 +1,4 @@
-import { ConversionError, throwIfAborted } from '@/lib/errors'
+import { ConversionError, redactQuoted, throwIfAborted } from '@/lib/errors'
 import type { ConvertContext } from '@/registry/types'
 
 type PdfMakeStatic = {
@@ -119,7 +119,7 @@ export async function htmlToPdfBlob(html: string, ctx: ConvertContext, title: st
     const blob = await pdfMake.createPdf(docDefinition(content, ctx, title)).getBlob()
     return { blob, warnings }
   } catch (e) {
-    throw new ConversionError('unknown', 'The PDF could not be laid out', e instanceof Error ? e.message.slice(0, 160) : 'pdfmake failed.', 'Very complex tables or nested layouts can fail; try exporting to HTML instead.')
+    throw new ConversionError('unknown', 'The PDF could not be laid out', e instanceof Error ? redactQuoted(e.message).slice(0, 160) : 'pdfmake failed.', 'Very complex tables or nested layouts can fail; try exporting to HTML instead.')
   }
 }
 

@@ -4,6 +4,7 @@ import { gunzipSync } from 'node:zlib'
 import { describe, expect, it } from 'vitest'
 import { canTransition, isPending } from '@/features/queue/job-state'
 import { checkArchiveBudget, archiveLimits, sanitizeArchivePath } from '@/lib/archive-safety'
+import { crc32 } from '@/lib/crc32'
 import { CanceledError, ConversionError, classifyError } from '@/lib/errors'
 import { baseName, describeSizeChange, formatBytes, formatDuration, outputName, safeFilename, sizeChangePercent, uniqueName } from '@/lib/files'
 import { parseJpeg, parsePng, stripJpegMetadata, stripPngMetadata } from '@/lib/exif'
@@ -98,6 +99,20 @@ describe('error classification', () => {
     const info = classifyError('weird')
     expect(info.title.length).toBeGreaterThan(5)
     expect(info.suggestion).toBeTruthy()
+  })
+  it('strips quoted file contents from unexpected engine messages', () => {
+    const info = classifyError(new Error('Unexpected identifier "sk-LEAK-0123456789"'))
+    expect(info.detail).not.toContain('sk-LEAK')
+    expect(info.detail).toContain('“…”')
+  })
+})
+
+describe('zip checksums', () => {
+  it('matches the CRC-32 stored in a real archive', async () => {
+    const entries = (await readZipDirectory(new Blob([fx('bundle.zip')])))!
+    const file = entries.find((e) => e.path === 'docs/notes.md')!
+    expect(file.crc32).toBeGreaterThan(0)
+    expect(crc32(new TextEncoder().encode('hello'))).toBe(0x3610a686)
   })
 })
 

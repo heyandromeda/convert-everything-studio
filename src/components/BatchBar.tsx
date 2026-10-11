@@ -5,8 +5,18 @@ import { Button } from '@/components/ui/button'
 import { isPending } from '@/features/queue/job-state'
 import { cancelAll, clearAll, convert } from '@/features/queue/runner'
 import { useQueue } from '@/features/queue/store'
+import { useArmed } from '@/hooks/use-armed'
 import { buildZip, triggerDownload } from '@/lib/download'
 import { baseName, formatBytes, safeFilename } from '@/lib/files'
+
+function StopAllButton() {
+  const armed = useArmed()
+  return (
+    <Button size="touch-lg" variant="secondary" className="flex-1" onClick={cancelAll} disabled={!armed}>
+      <SquareIcon className="size-4" /> Stop all
+    </Button>
+  )
+}
 
 /** Sticky bottom bar: the primary action stays under the thumb on phones. */
 export function BatchBar() {
@@ -70,16 +80,16 @@ export function BatchBar() {
           </button>
         </div>
         <div className="flex gap-2">
-          {stats.pending > 0 ? (
-            <Button size="touch-lg" variant="secondary" className="flex-1" onClick={cancelAll}>
-              <SquareIcon className="size-4" /> Stop all
-            </Button>
-          ) : null}
-          {stats.ready > 0 && (
+          {stats.ready > 0 ? (
             <Button size="touch-lg" className="flex-[2]" onClick={() => convert()} data-testid="convert-all">
               Convert {stats.ready > 1 ? `${stats.ready} files` : ''} <ArrowRightIcon />
             </Button>
-          )}
+          ) : stats.pending > 0 ? (
+            <Button size="touch-lg" className="flex-[2]" disabled aria-live="polite">
+              <Loader2Icon className="animate-spin" /> Converting…
+            </Button>
+          ) : null}
+          {stats.pending > 0 && <StopAllButton />}
           {stats.outputs.length > 1 && !stats.pending && (
             zipCurrent ? (
               <Button asChild size="touch-lg" variant="secondary" className="flex-1">

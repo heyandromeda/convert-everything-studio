@@ -13,7 +13,7 @@ const TIME = /(?:(\d+):)?(\d{1,2}):(\d{2})[,.](\d{1,3})/
 
 function parseTime(s: string): number {
   const m = TIME.exec(s.trim())
-  if (!m) throw new Error(`Bad timestamp: ${s.slice(0, 30)}`)
+  if (!m) throw new Error('A timing line is not in the HH:MM:SS,mmm --> HH:MM:SS,mmm format.')
   return (Number(m[1] ?? 0) * 3600 + Number(m[2]) * 60 + Number(m[3])) * 1000 + Number(m[4].padEnd(3, '0'))
 }
 
