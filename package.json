@@ -13,7 +13,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "deploy:preview": "vercel build --target preview --yes && url=$(vercel deploy --prebuilt --target preview --yes) && vercel alias set \"$url\" convert-everything-preview.vercel.app --scope heyandromeda && printf '%s\\n' \"$url\""
+    "deploy:preview": "node scripts/deploy-preview.mjs"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",
