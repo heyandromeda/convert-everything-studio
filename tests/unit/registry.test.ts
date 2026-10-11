@@ -131,4 +131,12 @@ describe('deployment config', () => {
     expect(csp).toContain("connect-src 'self' blob: data:")
     expect(csp).not.toMatch(/https?:/)
   })
+
+  it('Vite base comes from VITE_BASE so GitHub Pages can live under /convert-everything-studio/', async () => {
+    const { readFileSync } = await import('node:fs')
+    const src = readFileSync(new URL('../../vite.config.ts', import.meta.url), 'utf8')
+    expect(src).toContain("process.env.VITE_BASE")
+    expect(src).toContain('const base')
+    expect(src).toContain('withBase')
+  })
 })

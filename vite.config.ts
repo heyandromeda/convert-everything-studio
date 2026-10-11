@@ -5,6 +5,10 @@ import { defineConfig, type Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { CSP, SECURITY_HEADERS, vercelConfig } from './security-headers.mjs'
 
+/** Root-relative base. GitHub Pages uses `/convert-everything-studio/`; Vercel stays `/`. */
+const base = (process.env.VITE_BASE || '/').replace(/\/?$/, '/')
+const withBase = (path: string) => `${base}${path.replace(/^\//, '')}`
+
 /** Injects the CSP meta tag and writes host header files (Netlify `_headers`, `vercel.json`). */
 function securityHeaders(): Plugin {
   return {
@@ -23,6 +27,7 @@ function securityHeaders(): Plugin {
 }
 
 export default defineConfig({
+  base,
   plugins: [
     react(),
     tailwindcss(),
@@ -38,12 +43,12 @@ export default defineConfig({
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
-        start_url: '/',
-        scope: '/',
+        start_url: withBase(''),
+        scope: withBase(''),
         icons: [
-          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: withBase('icons/icon-192.png'), sizes: '192x192', type: 'image/png' },
+          { src: withBase('icons/icon-512.png'), sizes: '512x512', type: 'image/png' },
+          { src: withBase('icons/icon-maskable-512.png'), sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {
@@ -58,16 +63,16 @@ export default defineConfig({
             warnings: [],
           }),
         ],
-        navigateFallback: '/index.html',
+        navigateFallback: withBase('index.html'),
         runtimeCaching: [
           {
-            urlPattern: ({ url }) => url.pathname.startsWith('/vendor/'),
+            urlPattern: ({ url }) => url.pathname.includes('/vendor/'),
             handler: 'CacheFirst',
             options: { cacheName: 'ce-engines', expiration: { maxEntries: 400 }, cacheableResponse: { statuses: [0, 200] } },
           },
           {
             // Hashed build assets that were too large to precache.
-            urlPattern: ({ url }) => url.pathname.startsWith('/assets/'),
+            urlPattern: ({ url }) => url.pathname.includes('/assets/'),
             handler: 'CacheFirst',
             options: { cacheName: 'ce-engines-assets', expiration: { maxEntries: 200 }, cacheableResponse: { statuses: [0, 200] } },
           },
