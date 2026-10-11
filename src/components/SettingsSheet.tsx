@@ -55,8 +55,8 @@ export function SettingsSheet({ open, onOpenChange, theme, onTheme }: Props) {
                   aria-checked={theme === value}
                   onClick={() => onTheme(value)}
                   className={cn(
-                    'flex h-16 flex-col items-center justify-center gap-1 rounded-2xl border text-[13px] font-medium transition-colors',
-                    theme === value ? 'border-brand bg-brand/10 text-foreground' : 'text-muted-foreground hover:bg-accent',
+                    'flex h-16 flex-col items-center justify-center gap-1 rounded-[4px] border text-[13px] font-bold transition-colors',
+                    theme === value ? 'border-foreground bg-muted text-foreground' : 'border-border text-muted-foreground hover:bg-accent',
                   )}
                 >
                   <Icon className="size-4" /> {label}

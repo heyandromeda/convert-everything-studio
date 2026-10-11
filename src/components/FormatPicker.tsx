@@ -41,7 +41,7 @@ export function FormatPicker({ input, fileSize, value, onChange, disabled }: Pro
         onClick={() => setOpen(true)}
         data-testid="format-picker"
         aria-haspopup="dialog"
-        className="flex h-12 w-full min-w-0 items-center gap-3 rounded-xl border border-input bg-background/60 px-3.5 text-left transition-colors hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none disabled:opacity-60"
+        className="flex min-h-11 w-full min-w-0 items-center gap-3 rounded-[4px] border border-input bg-background px-3 py-[0.7rem] text-left transition-colors hover:border-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#ddd] disabled:opacity-60"
       >
         <span className="shrink-0 text-xs font-medium tracking-wide text-muted-foreground uppercase">To</span>
         <span className="min-w-0 flex-1 truncate text-[15px] font-semibold">{current ? current.label : 'Choose format'}</span>
@@ -78,8 +78,8 @@ export function FormatPicker({ input, fileSize, value, onChange, disabled }: Pro
                           setOpen(false)
                         }}
                         className={cn(
-                          'flex w-full items-start gap-3 rounded-2xl px-3 py-3 text-left transition-colors',
-                          selected ? 'bg-brand/10 ring-1 ring-brand/30' : 'hover:bg-accent',
+                          'flex w-full items-start gap-3 rounded-[4px] px-3 py-3 text-left transition-colors',
+                          selected ? 'bg-muted' : 'hover:bg-accent',
                           unavailable && 'cursor-not-allowed opacity-60 hover:bg-transparent',
                         )}
                       >

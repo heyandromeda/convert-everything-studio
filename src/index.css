@@ -1,15 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
-@import "@fontsource-variable/geist-mono";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --font-heading: var(--font-sans);
-  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, monospace;
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -43,56 +41,56 @@
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.985 0.002 250);
-  --foreground: oklch(0.18 0.01 260);
-  --surface: oklch(1 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.01 260);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.01 260);
-  --primary: oklch(0.2 0.01 260);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.955 0.004 260);
-  --secondary-foreground: oklch(0.22 0.01 260);
-  --muted: oklch(0.955 0.004 260);
-  --muted-foreground: oklch(0.47 0.012 260);
-  --accent: oklch(0.95 0.006 260);
-  --accent-foreground: oklch(0.2 0.01 260);
-  --destructive: oklch(0.56 0.21 25);
-  --border: oklch(0.9 0.005 260);
-  --input: oklch(0.88 0.006 260);
-  --ring: oklch(0.55 0.14 165);
-  --brand: oklch(0.55 0.13 168);
-  --brand-foreground: oklch(0.99 0 0);
-  --success: oklch(0.52 0.13 155);
-  --warning: oklch(0.6 0.14 70);
+  --radius: 0.25rem;
+  --background: #ffffff;
+  --foreground: #222222;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --card-foreground: #222222;
+  --popover: #ffffff;
+  --popover-foreground: #222222;
+  --primary: #222222;
+  --primary-foreground: #ffffff;
+  --secondary: #ffffff;
+  --secondary-foreground: #222222;
+  --muted: #f7f7f7;
+  --muted-foreground: #555555;
+  --accent: #f7f7f7;
+  --accent-foreground: #222222;
+  --destructive: #a12626;
+  --border: #dddddd;
+  --input: #999999;
+  --ring: #dddddd;
+  --brand: #222222;
+  --brand-foreground: #ffffff;
+  --success: #176b36;
+  --warning: #b57900;
 }
 
 .dark {
-  --background: oklch(0.155 0.006 260);
-  --foreground: oklch(0.96 0.003 260);
-  --surface: oklch(0.195 0.007 260);
-  --card: oklch(0.195 0.007 260);
-  --card-foreground: oklch(0.96 0.003 260);
-  --popover: oklch(0.215 0.008 260);
-  --popover-foreground: oklch(0.96 0.003 260);
-  --primary: oklch(0.96 0.003 260);
-  --primary-foreground: oklch(0.17 0.006 260);
-  --secondary: oklch(0.255 0.008 260);
-  --secondary-foreground: oklch(0.94 0.003 260);
-  --muted: oklch(0.245 0.008 260);
-  --muted-foreground: oklch(0.72 0.01 260);
-  --accent: oklch(0.27 0.009 260);
-  --accent-foreground: oklch(0.96 0.003 260);
-  --destructive: oklch(0.7 0.17 22);
-  --border: oklch(1 0 0 / 9%);
-  --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.8 0.13 168);
-  --brand: oklch(0.82 0.13 168);
-  --brand-foreground: oklch(0.18 0.03 170);
-  --success: oklch(0.8 0.14 155);
-  --warning: oklch(0.83 0.13 80);
+  --background: #111111;
+  --foreground: #f3f3f3;
+  --surface: #111111;
+  --card: #161616;
+  --card-foreground: #f3f3f3;
+  --popover: #161616;
+  --popover-foreground: #f3f3f3;
+  --primary: #f3f3f3;
+  --primary-foreground: #111111;
+  --secondary: #111111;
+  --secondary-foreground: #f3f3f3;
+  --muted: #1c1c1c;
+  --muted-foreground: #aaaaaa;
+  --accent: #1c1c1c;
+  --accent-foreground: #f3f3f3;
+  --destructive: #ff8d8d;
+  --border: #333333;
+  --input: #666666;
+  --ring: #555555;
+  --brand: #f3f3f3;
+  --brand-foreground: #111111;
+  --success: #8dcea8;
+  --warning: #e2b657;
 }
 
 @layer base {

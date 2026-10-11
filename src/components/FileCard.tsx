@@ -61,7 +61,7 @@ export const FileCard = memo(function FileCard({ id }: { id: string }) {
   return (
     <article
       className={cn(
-        'rounded-3xl border bg-card p-3.5 shadow-[0_1px_0_0_oklch(1_0_0/0.03)_inset] transition-colors sm:p-4',
+        'rounded-[4px] border bg-card p-4 transition-colors',
         status === 'failed' && 'border-destructive/40',
         status === 'completed' && 'border-success/30',
       )}
@@ -76,7 +76,7 @@ export const FileCard = memo(function FileCard({ id }: { id: string }) {
           onClick={() => setPreviewOpen(true)}
           disabled={!detected?.formatId || !!item.sources}
           aria-label={`Preview ${item.file.name}`}
-          className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-muted ring-1 ring-border focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-[4px] border bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#555]"
         >
           {item.thumbUrl ? (
             <img src={item.thumbUrl} alt="" className="checkerboard size-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
@@ -150,7 +150,7 @@ export const FileCard = memo(function FileCard({ id }: { id: string }) {
             {def?.options?.length ? (
               <Button
                 variant={showOptions ? 'secondary' : 'outline'}
-                className="h-12 w-12 shrink-0 rounded-xl"
+                className="size-11 shrink-0 rounded-[4px]"
                 onClick={() => setShowOptions((s) => !s)}
                 aria-expanded={showOptions}
                 aria-label="Conversion settings"
@@ -170,7 +170,7 @@ export const FileCard = memo(function FileCard({ id }: { id: string }) {
           )}
 
           {showOptions && def?.options && (
-            <div className="space-y-4 rounded-2xl bg-muted/40 p-3.5">
+            <div className="space-y-4 border-t border-border pt-4">
               <ConversionOptions fields={def.options} values={item.options} input={detected} onChange={(p) => setOptions(id, p)} disabled={busy} />
               {useQueue.getState().items.length > 1 && (
                 <Button

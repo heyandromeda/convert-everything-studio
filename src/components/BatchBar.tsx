@@ -58,8 +58,8 @@ export function BatchBar() {
   ].filter(Boolean)
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/85 pb-safe backdrop-blur-xl supports-[backdrop-filter]:bg-background/70">
-      <div className="mx-auto flex max-w-3xl flex-col gap-2 px-safe pt-3">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background pb-safe">
+      <div className="mx-auto flex w-[min(100%-2rem,700px)] flex-col gap-2 pt-3">
         <div className="flex items-center justify-between gap-2 text-[12.5px] text-muted-foreground" aria-live="polite">
           <span>
             {items.length} file{items.length === 1 ? '' : 's'}
@@ -76,7 +76,7 @@ export function BatchBar() {
             </Button>
           ) : null}
           {stats.ready > 0 && (
-            <Button size="touch-lg" className="flex-[2] bg-brand text-brand-foreground hover:bg-brand/90" onClick={() => convert()} data-testid="convert-all">
+            <Button size="touch-lg" className="flex-[2]" onClick={() => convert()} data-testid="convert-all">
               Convert {stats.ready > 1 ? `${stats.ready} files` : ''} <ArrowRightIcon />
             </Button>
           )}

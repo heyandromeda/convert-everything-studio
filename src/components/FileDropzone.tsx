@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ImagePlusIcon, PlusIcon, UploadIcon } from 'lucide-react'
+import { ImagePlusIcon, PlusIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -102,30 +102,20 @@ export function FileDropzone({ onFiles, compact }: Props) {
   }
 
   return (
-    <div
-      className={cn(
-        'relative flex flex-col items-center gap-5 rounded-3xl border border-dashed border-border bg-surface/60 px-5 py-10 text-center transition-colors sm:py-14',
-        dragging && 'border-brand bg-brand/5',
-      )}
-    >
+    <div className={cn(dragging && 'outline outline-2 outline-foreground outline-offset-4')}>
       {inputs}
-      <div className="flex size-14 items-center justify-center rounded-2xl bg-brand/12 text-brand ring-1 ring-brand/20">
-        <UploadIcon className="size-6" aria-hidden />
-      </div>
-      <div className="space-y-1.5">
-        <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Choose files to convert</h2>
-        <p className="mx-auto max-w-sm text-[15px] text-muted-foreground">
-          Images, video, audio, documents, spreadsheets and archives. <span className="hidden sm:inline">Drop them here or browse.</span>
-        </p>
-      </div>
-      <div className="flex w-full max-w-sm flex-col gap-2.5 sm:flex-row">
-        <Button size="touch-lg" className="w-full bg-brand text-brand-foreground hover:bg-brand/90 sm:w-auto sm:flex-1" onClick={() => inputRef.current?.click()}>
-          <PlusIcon /> Browse files
+      <h2 className="mb-1.5 text-[0.95rem] font-bold">Choose files to convert</h2>
+      <div className="flex flex-wrap gap-2">
+        <Button className="flex-1 sm:flex-none" onClick={() => inputRef.current?.click()}>
+          Browse files
         </Button>
-        <Button size="touch-lg" variant="secondary" className="w-full sm:w-auto sm:flex-1" onClick={() => mediaRef.current?.click()}>
-          <ImagePlusIcon /> Photos & videos
+        <Button variant="secondary" className="flex-1 sm:flex-none" onClick={() => mediaRef.current?.click()}>
+          Photos & videos
         </Button>
       </div>
+      <p className="mt-3 text-[0.9rem] leading-normal text-[#555] dark:text-[#aaa]">
+        Images, video, audio, documents, spreadsheets and archives. Drop them anywhere on this page.
+      </p>
       {dragging && <DragOverlay />}
     </div>
   )
@@ -134,7 +124,7 @@ export function FileDropzone({ onFiles, compact }: Props) {
 function DragOverlay() {
   return (
     <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-      <div className="rounded-3xl border-2 border-dashed border-brand px-10 py-8 text-lg font-medium text-brand">Drop files to add them</div>
+      <div className="border border-foreground bg-background px-6 py-5 text-[0.95rem] font-bold">Drop files to add them</div>
     </div>
   )
 }

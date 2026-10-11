@@ -29,7 +29,7 @@ export function ResultRow({ item, result, showDelta }: { item: QueueItem; result
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-muted/50 p-2.5" data-testid="result-row">
+    <div className="flex items-center gap-3 border border-border bg-[#f7f7f7] p-2.5 dark:bg-[#1c1c1c]" data-testid="result-row">
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -60,7 +60,7 @@ export function ResultRow({ item, result, showDelta }: { item: QueueItem; result
             <Share2Icon />
           </Button>
         )}
-        <Button asChild size="icon-touch" className="bg-brand text-brand-foreground hover:bg-brand/90">
+        <Button asChild size="icon-touch">
           <a href={result.url} download={result.name} aria-label={`Download ${result.name}`} data-testid="download-link">
             <DownloadIcon />
           </a>
@@ -103,7 +103,7 @@ export function ResultRow({ item, result, showDelta }: { item: QueueItem; result
                 <Share2Icon /> Share
               </Button>
             )}
-            <Button asChild size="touch" className="flex-1 bg-brand text-brand-foreground hover:bg-brand/90">
+            <Button asChild size="touch" className="flex-1">
               <a href={result.url} download={result.name}>
                 <DownloadIcon /> Download
               </a>

@@ -36,7 +36,7 @@ export function BatchToolbar() {
   }
 
   return (
-    <section aria-label="Batch actions" className="space-y-3 rounded-3xl border bg-card/60 p-3.5">
+    <section aria-label="Batch actions" className="space-y-3 border-t border-border pt-4">
       {groups.images.length >= 2 && (
         <div className="space-y-2">
           <p className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground">

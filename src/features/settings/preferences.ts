@@ -6,7 +6,7 @@ import type { OptionValues } from '@/registry/types'
  * File names, contents and results are never persisted.
  */
 const KEY = 'ce:prefs:v1'
-const THEME_KEY = 'ce:theme'
+const THEME_KEY = 'ce:theme:v2'
 const REMEMBER_KEY = 'ce:remember'
 
 /** Settings that are specific to one file and should not carry over to the next. */
@@ -70,9 +70,9 @@ export type ThemePref = 'dark' | 'light' | 'system'
 export function loadTheme(): ThemePref {
   try {
     const v = localStorage.getItem(THEME_KEY)
-    return v === 'light' || v === 'system' ? v : 'dark'
+    return v === 'dark' || v === 'system' ? v : 'light'
   } catch {
-    return 'dark'
+    return 'light'
   }
 }
 

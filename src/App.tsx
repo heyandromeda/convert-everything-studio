@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { LayoutGridIcon, SettingsIcon, ShieldCheckIcon, WifiOffIcon } from 'lucide-react'
+import { WifiOffIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
 import { BatchBar } from '@/components/BatchBar'
@@ -16,7 +16,7 @@ import { useOnline } from '@/hooks/use-online'
 function applyTheme(t: ThemePref) {
   const dark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
   document.documentElement.classList.toggle('dark', dark)
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#111318' : '#fafbfc')
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#111111' : '#ffffff')
 }
 
 export default function App() {
@@ -41,39 +41,33 @@ export default function App() {
   const hasItems = itemIds.length > 0
 
   return (
-    <div className="min-h-dvh">
-      <header className="sticky top-0 z-30 border-b border-transparent bg-background/80 pt-safe backdrop-blur-xl supports-[backdrop-filter]:bg-background/65">
-        <div className="mx-auto flex h-14 max-w-3xl items-center gap-3 px-safe">
-          <div className="flex min-w-0 flex-1 items-center gap-2.5">
-            <Logo />
-            <h1 className="truncate text-[17px] font-semibold tracking-tight">Convert Everything</h1>
+    <div className="min-h-dvh bg-background text-foreground">
+      <main className={`mx-auto w-[min(100%-2rem,700px)] pt-[max(env(safe-area-inset-top),3rem)] ${hasItems ? 'pb-44' : 'pb-12'}`}>
+        <div className="mb-2 flex items-start justify-between gap-3">
+          <p className="pt-2 text-xs tracking-[0.08em] text-[#666] uppercase dark:text-[#aaa]">Local utility</p>
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={() => setCompatOpen(true)} aria-label="Supported formats">
+              Formats
+            </Button>
+            <Button variant="secondary" onClick={() => setSettingsOpen(true)} aria-label="Settings and privacy">
+              Settings
+            </Button>
           </div>
-          {!online && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-[12px] text-muted-foreground" title="Offline: cached conversions still work">
-              <WifiOffIcon className="size-3.5" /> Offline
-            </span>
-          )}
-          <Button variant="ghost" size="icon-touch" onClick={() => setCompatOpen(true)} aria-label="Supported formats">
-            <LayoutGridIcon />
-          </Button>
-          <Button variant="ghost" size="icon-touch" onClick={() => setSettingsOpen(true)} aria-label="Settings and privacy">
-            <SettingsIcon />
-          </Button>
         </div>
-      </header>
-
-      <main className={`mx-auto max-w-3xl space-y-4 px-safe pt-3 ${hasItems ? 'pb-44' : 'pb-10'}`}>
-        <p className="flex items-center gap-2 text-[13.5px] text-muted-foreground">
-          <ShieldCheckIcon className="size-4 shrink-0 text-brand" aria-hidden />
-          <span>
-            <strong className="font-semibold text-foreground">Your files stay on your device.</strong> Conversion runs in this browser; nothing is uploaded.
-          </span>
+        {!online && (
+          <p className="mb-2 inline-flex items-center gap-1.5 text-sm text-muted-foreground" title="Offline: cached conversions still work">
+            <WifiOffIcon className="size-3.5" /> Offline. Cached conversions still work.
+          </p>
+        )}
+        <h1 className="mb-2 text-[2rem] leading-tight font-normal">Convert Everything</h1>
+        <p className="mb-6 leading-normal text-[#555] dark:text-[#aaa]">
+          Convert images, documents, spreadsheets, audio, video and archives. Files stay in this browser.
         </p>
 
         <FileDropzone onFiles={onFiles} compact={hasItems} />
 
         {hasItems ? (
-          <section aria-label="Files" className="space-y-3">
+          <section aria-label="Files" className="mt-4 space-y-4 border-t border-border pt-4">
             {itemIds.map((id) => (
               <FileCard key={id} id={id} />
             ))}
@@ -82,6 +76,8 @@ export default function App() {
         ) : (
           <QuickGuide onShowFormats={() => setCompatOpen(true)} />
         )}
+
+        <p className="mt-6 text-[0.8rem] text-[#777]">Runs entirely in your browser. Nothing is uploaded or stored.</p>
       </main>
 
       <BatchBar />
@@ -92,33 +88,23 @@ export default function App() {
   )
 }
 
-function Logo() {
-  return (
-    <svg viewBox="0 0 32 32" className="size-7 shrink-0" aria-hidden>
-      <rect width="32" height="32" rx="9" className="fill-brand" />
-      <path d="M10 12.5h9.5l-2.6-2.6M22 19.5h-9.5l2.6 2.6" fill="none" className="stroke-brand-foreground" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
 const EXAMPLES: [string, string][] = [
   ['PNG / JPEG / HEIC', 'WebP, AVIF, PNG, JPEG, PDF'],
-  ['Photos', 'Remove GPS & camera metadata'],
+  ['Photos', 'Remove GPS and camera metadata'],
   ['Images', 'Resize, compress, make icons'],
 ]
 
 function QuickGuide({ onShowFormats }: { onShowFormats: () => void }) {
   return (
-    <section className="space-y-3 pt-2" aria-label="What you can do">
-      <div className="grid gap-2 sm:grid-cols-3">
+    <section className="mt-4 space-y-3" aria-label="What you can do">
+      <ul className="space-y-1 text-[0.9rem] leading-normal text-[#555] dark:text-[#aaa]">
         {EXAMPLES.map(([from, to]) => (
-          <div key={from} className="rounded-2xl border bg-card/60 p-3.5">
-            <p className="text-[13px] font-semibold">{from}</p>
-            <p className="mt-0.5 text-[13px] text-muted-foreground">{to}</p>
-          </div>
+          <li key={from}>
+            <strong className="font-bold text-foreground">{from}.</strong> {to}
+          </li>
         ))}
-      </div>
-      <button onClick={onShowFormats} className="text-[13.5px] font-medium text-brand underline-offset-4 hover:underline">
+      </ul>
+      <button onClick={onShowFormats} className="text-[0.9rem] font-bold underline underline-offset-2">
         See every supported conversion
       </button>
     </section>

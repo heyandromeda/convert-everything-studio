@@ -20,9 +20,9 @@ export function ConversionProgress({ status, progress, message }: { status: JobS
         aria-valuenow={pct ?? undefined}
       >
         {determinate ? (
-          <div className="h-full rounded-full bg-brand transition-[width] duration-300" style={{ width: `${pct}%` }} />
+          <div className="h-full rounded-full bg-foreground transition-[width] duration-300" style={{ width: `${pct}%` }} />
         ) : (
-          <div className={cn('absolute inset-y-0 w-2/5 rounded-full bg-brand/80', 'animate-indeterminate')} />
+          <div className={cn('absolute inset-y-0 w-2/5 rounded-full bg-foreground/80', 'animate-indeterminate')} />
         )}
       </div>
     </div>
