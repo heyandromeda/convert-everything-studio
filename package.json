@@ -12,7 +12,8 @@
     "lint": "oxlint src",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "deploy:preview": "vercel build --target preview --yes && vercel deploy --prebuilt --target preview --yes"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",

@@ -26,3 +26,6 @@ public/vendor/
 test-results/
 playwright-report/
 .netlify/
+.vercel/
+.vercel
+.env*
