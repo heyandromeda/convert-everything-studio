@@ -1,8 +1,12 @@
 # Convert Everything
 
-A privacy-first file converter that runs entirely in your browser. Images, documents, spreadsheets, data files, subtitles, archives, audio and video are converted on your device with JavaScript and WebAssembly. Nothing is uploaded.
+**Website:** https://convert-everything-preview.vercel.app
 
-It is a static web app (React + TypeScript + Vite) with no backend. It is designed mobile-first for iPhone Safari and also works on desktop.
+This is a website. Open that address in Safari, Chrome, or Firefox. There is no app to install and no App Store listing. On an iPhone, use Safari. Share → Add to Home Screen only saves a shortcut to this same website.
+
+It converts files in the browser tab. Images, documents, spreadsheets, data files, subtitles, archives, audio and video stay on the device and are converted with JavaScript and WebAssembly. Nothing is uploaded.
+
+The site is a static web app (React + TypeScript + Vite) with no backend. The layout is meant to be usable on a phone and on a desktop. The address above is a Vercel preview, not a production domain.
 
 ---
 
@@ -217,7 +221,7 @@ Fixtures: `scripts/generate-fixtures.py` (python-docx, python-pptx, openpyxl, re
 Smoke-test a deployed preview:
 
 ```bash
-LIVE_URL=https://your-preview.example LIVE_PASSWORD=optional npx playwright test live-smoke --project=webkit-iphone
+LIVE_URL=https://convert-everything-preview.vercel.app npx playwright test live-smoke --project=webkit-iphone
 ```
 
 ---
