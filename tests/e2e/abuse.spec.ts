@@ -17,7 +17,7 @@ const IDENTIFYING = /GPS|Make$|Model$|Artist|Creator|Comment|SerialNumber|OwnerN
 function identifyingTags(file: string) {
   return Object.entries(exif(file))
     .filter(([k]) => IDENTIFYING.test(k.split(':').pop() ?? ''))
-    .filter(([k]) => !/^(File|System|ExifTool|Composite):/.test(k))
+    .filter(([k]) => !/^(File|System|ExifTool|Composite|ICC[-_][^:]*):/.test(k))
 }
 
 /**
