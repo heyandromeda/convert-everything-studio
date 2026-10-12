@@ -47,13 +47,14 @@ export async function inspectExtra(file: File, fmt: string): Promise<FileMetadat
     case 'zip':
     case 'tar':
     case 'tgz': {
-      const { archiveListing } = await import('@/engines/archives/archives')
+      const { archiveListing, LISTING_CAP } = await import('@/engines/archives/archives')
       const entries = await archiveListing(file, fmt, caps.isMobile)
       if (!entries) return {}
       const files = entries.filter((e) => !e.isDirectory)
       return {
         archive: {
           entryCount: files.length,
+          entryCountIsMinimum: entries.length >= LISTING_CAP || undefined,
           totalSize: files.reduce((s, e) => s + e.size, 0),
           entries: entries.slice(0, 2000).map((e) => ({ path: e.path, size: e.size, compressedSize: e.compressedSize, isDirectory: e.isDirectory, unsafe: e.unsafe })),
           truncated: entries.length > 2000,

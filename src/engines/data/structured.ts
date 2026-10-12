@@ -19,6 +19,9 @@ async function readYaml(ctx: ConvertContext): Promise<unknown> {
     // Aliases are capped to defuse "billion laughs" style expansion.
     return YAML.parse(await ctx.file.text(), { maxAliasCount: 100, prettyErrors: true })
   } catch (e) {
+    if (e instanceof ReferenceError && /alias/i.test(e.message)) {
+      throw new ConversionError('too-large', 'This YAML expands too much', 'It reuses anchors (aliases) so many times that expanding it could freeze the browser, so it was not converted.')
+    }
     const pos = (e as { linePos?: { line: number; col: number }[] }).linePos?.[0]
     throw syntaxError('YAML', pos)
   }
@@ -30,7 +33,9 @@ async function readXml(ctx: ConvertContext): Promise<unknown> {
   const valid = XMLValidator.validate(xml)
   if (valid !== true) throw syntaxError('XML', { line: valid.err.line, col: valid.err.col })
   // processEntities stays limited to the predefined XML entities; DOCTYPE entities are never expanded.
-  const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_', parseTagValue: ctx.options.parseValues !== false, processEntities: true, htmlEntities: false, ignoreDeclaration: true, ignorePiTags: true })
+  const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_', parseTagValue: ctx.options.parseValues !== false, processEntities: true, htmlEntities: false, ignoreDeclaration: true, ignorePiTags: true,
+    // Values such as postcodes and IDs ("02134") stay text instead of losing their leading zeros.
+    numberParseOptions: { hex: false, leadingZeros: false, eNotation: true } })
   return parser.parse(xml)
 }
 

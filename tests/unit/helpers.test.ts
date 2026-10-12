@@ -16,6 +16,7 @@ import { headerKeys, isFormulaLike, jsonToRows, neutralizeFormula, rowsToCsv, ty
 import { formatTime, parseSubtitles, toSrt, toVtt } from '@/engines/data/subtitles'
 import { listTar } from '@/engines/archives/tar'
 import { parsePageRange } from '@/engines/documents/pdf-read'
+import { pageSuffix } from '@/engines/documents/pdf-pages'
 import { parseTimecode } from '@/engines/media/convert'
 import { decodeText } from '@/engines/documents/html'
 
@@ -146,6 +147,11 @@ describe('archive safety', () => {
     expect(entries.map((e) => e.path)).toEqual(['project/main.txt', 'project/sub/deep.txt'])
     const main = entries[0]
     expect(new TextDecoder().decode(tar.subarray(main.offset, main.offset + main.size))).toBe('main file\n')
+    expect(entries.every((e) => !e.damaged)).toBe(true)
+  })
+  it('flags TAR entries whose data is cut off or whose header checksum is wrong', () => {
+    expect(listTar(new Uint8Array(fx('abuse/truncated.tar')))).toMatchObject([{ path: 'big.bin', size: 4096, damaged: true }])
+    expect(listTar(new Uint8Array(fx('abuse/bad-checksum.tar')))[0].damaged).toBe(true)
   })
 })
 
@@ -275,6 +281,11 @@ describe('subtitles', () => {
 })
 
 describe('parsers for user input', () => {
+  it('names extracted pages without a dangling dash', () => {
+    expect(pageSuffix('')).toBe('-pages')
+    expect(pageSuffix('all')).toBe('-pages')
+    expect(pageSuffix('2-3, 5')).toBe('-pages-2-3,5')
+  })
   it('parses page ranges', () => {
     expect(parsePageRange('', 3)).toEqual([1, 2, 3])
     expect(parsePageRange('3, 1-2, 2', 5)).toEqual([1, 2, 3])

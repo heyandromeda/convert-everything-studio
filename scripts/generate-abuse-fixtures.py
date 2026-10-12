@@ -121,4 +121,47 @@ subprocess.run(
     check=True,
 )
 
+# --- Added by the independent audit (docs/final-independent-audit.md) ---
+
+# GPS photo with a non-default EXIF orientation (takes the canvas path in image → PDF).
+shutil.copy(p('gps.jpg'), p('gps-rotated.jpg'))
+subprocess.run(['exiftool', '-overwrite_original', '-q', '-n', '-Orientation=6', p('gps-rotated.jpg')], check=True)
+
+# TAR whose header declares 4096 bytes of data, of which only 100 are present.
+import tarfile
+tar_buf = io.BytesIO()
+with tarfile.open(fileobj=tar_buf, mode='w', format=tarfile.USTAR_FORMAT) as t:
+    info = tarfile.TarInfo('big.bin')
+    info.size = 4096
+    info.mtime = 0
+    t.addfile(info, io.BytesIO(bytes(range(256)) * 16))
+write('truncated.tar', tar_buf.getvalue()[: 512 + 100])
+
+# Complete TAR with one corrupted header byte (the file name), so the checksum no longer matches.
+whole_tar = bytearray(tar_buf.getvalue())
+whole_tar[0] ^= 0x01
+write('bad-checksum.tar', bytes(whole_tar))
+
+# Markdown whose HTML output must not load anything remote when the saved file is opened.
+write('remote-media.md', b"""# Remote media
+
+<video src="https://tracker.example/v.mp4" poster="https://tracker.example/poster.png"></video>
+<audio src="https://tracker.example/a.mp3"></audio>
+<table background="https://tracker.example/bg.png"><tr><td>cell</td></tr></table>
+<svg><image href="https://tracker.example/svg.png" width="10" height="10" /></svg>
+<a href="https://example.com/" ping="https://tracker.example/ping">kept link</a>
+""")
+
+# Inline SVG without width/height, which pdfmake refuses unless it is given a size.
+write('svg-nosize.md', b'# Diagram\n\n<svg viewBox="0 0 40 20"><rect width="40" height="20" fill="#2f6f4f"/></svg>\n\n<svg><circle cx="5" cy="5" r="5"/></svg>\n')
+
+# Postcode-like values that must keep their leading zeros in XML → JSON.
+write('postcodes.xml', b'<places><place><zip>02134</zip><n>12</n><rate>0.5</rate></place></places>\n')
+
+# YAML "billion laughs": every level multiplies the previous one tenfold through aliases.
+levels = ['a: &a ["x","x","x","x","x","x","x","x","x","x"]']
+for prev, cur in zip('abcdef', 'bcdefg'):
+    levels.append(f'{cur}: &{cur} [' + ','.join([f'*{prev}'] * 10) + ']')
+write('alias-bomb.yaml', ('\n'.join(levels) + '\n').encode())
+
 print('abuse fixtures written to', os.path.abspath(OUT))

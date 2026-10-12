@@ -54,6 +54,14 @@ async function rasterizeDataUri(src: string): Promise<string | null> {
 async function normalizeImages(html: string): Promise<{ html: string; dropped: number }> {
   const doc = new DOMParser().parseFromString(`<body>${html}</body>`, 'text/html')
   let dropped = 0
+  // pdfmake rejects an SVG without width and height; give it the size a browser would draw it at.
+  for (const svg of Array.from(doc.querySelectorAll('svg')).filter((s) => !s.parentElement?.closest('svg'))) {
+    const vb = svg.getAttribute('viewBox')?.split(/[\s,]+/).map(Number)
+    const fromBox = vb && vb.length === 4 && vb[2] > 0 && vb[3] > 0
+    const plain = (v: string | null) => v !== null && /^\s*\d+(\.\d+)?(px)?\s*$/.test(v) && parseFloat(v) > 0
+    if (!plain(svg.getAttribute('width'))) svg.setAttribute('width', String(fromBox ? vb[2] : 300))
+    if (!plain(svg.getAttribute('height'))) svg.setAttribute('height', String(fromBox ? vb[3] : 150))
+  }
   for (const img of Array.from(doc.querySelectorAll('img'))) {
     const src = img.getAttribute('src') ?? ''
     if (/^data:image\/(png|jpe?g);/i.test(src)) continue

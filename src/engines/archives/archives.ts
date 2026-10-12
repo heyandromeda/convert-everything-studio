@@ -26,15 +26,21 @@ async function gunzipWithLimit(data: Uint8Array, limit: number, signal: AbortSig
     if (total > limit) error = new ConversionError('unsafe-archive', 'This archive expands too much', 'The decompressed data exceeds the safe size for in-browser extraction on this device.')
     else chunks.push(chunk)
   })
-  const step = 1 << 20
+  // fflate hands back everything one push decompresses in a single chunk, and deflate can expand
+  // about 1000:1. Small pushes keep each chunk near 16 MB, so the limit stops a bomb before the
+  // memory is spent instead of after.
+  const step = 16 << 10
   for (let i = 0; i < data.length && !error; i += step) {
-    throwIfAborted(signal)
     try {
       g.push(data.subarray(i, i + step), i + step >= data.length)
     } catch {
+      if (error) break
       throw new ConversionError('corrupt', 'The compressed data is damaged', 'The gzip stream could not be decompressed.')
     }
-    await new Promise((r) => setTimeout(r, 0))
+    if (i % (1 << 20) === 0) {
+      throwIfAborted(signal)
+      await new Promise((r) => setTimeout(r, 0))
+    }
   }
   if (error) throw error
   const out = new Uint8Array(total)
@@ -107,6 +113,14 @@ async function extractTar(ctx: ConvertContext): Promise<OutputFile[]> {
   const entries = listTar(bytes, limits.maxEntries + 1).filter((e) => !e.isDirectory && (e.type === '0' || e.type === '\0' || e.type === '7') && (!pick || pick.has(e.path)))
   const budget = checkArchiveBudget(entries, bytes.length, limits)
   if (budget) throw new ConversionError('unsafe-archive', 'Extraction was stopped for safety', budget)
+  if (entries.some((e) => e.damaged)) {
+    throw new ConversionError(
+      'corrupt',
+      'The TAR data is damaged',
+      'A file inside the archive is incomplete or its header checksum is wrong, so nothing was extracted.',
+      'Try re-downloading the archive or re-creating it.',
+    )
+  }
   return entries.map((e) => entryOutput(e.path, bytes.slice(e.offset, e.offset + e.size)))
 }
 
@@ -143,13 +157,16 @@ export const compressGzip: ConverterFn = async (ctx) => {
   return { outputs: [{ blob: new Blob([data as BlobPart], { type: 'application/gzip' }), name: `${safeFilename(ctx.file.name)}.gz`, formatId: 'gz' }] }
 }
 
+/** Entries listed for metadata and preview; extraction re-reads the archive with its own limits. */
+export const LISTING_CAP = 5000
+
 /** Entry listing for metadata/preview without extracting any data. */
 export async function archiveListing(file: File, formatId: string, isMobile: boolean) {
-  if (formatId === 'zip') return readZipDirectory(file, 5000)
-  if (formatId === 'tar') return listTar(new Uint8Array(await file.arrayBuffer()), 5000)
+  if (formatId === 'zip') return readZipDirectory(file, LISTING_CAP)
+  if (formatId === 'tar') return listTar(new Uint8Array(await file.arrayBuffer()), LISTING_CAP)
   if (formatId === 'tgz' && file.size < (isMobile ? 60 : 300) * 1024 * 1024) {
     const bytes = await gunzipWithLimit(new Uint8Array(await file.arrayBuffer()), archiveLimits(isMobile).maxTotalBytes, new AbortController().signal)
-    return listTar(bytes, 5000)
+    return listTar(bytes, LISTING_CAP)
   }
   return null
 }

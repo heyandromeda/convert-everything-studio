@@ -16,6 +16,12 @@ async function loadPdfLib(file: Blob) {
   }
 }
 
+/** "-pages-1-3,5" for a range, "-pages" when every page was kept (no dangling dash). */
+export function pageSuffix(range: string): string {
+  const r = range.replace(/[^\d,-]/g, '').replace(/^[-,]+|[-,]+$/g, '').slice(0, 24)
+  return r ? `-pages-${r}` : '-pages'
+}
+
 /** Copies selected pages into a new PDF without re-rendering (text stays selectable). */
 export const pdfExtractPages: ConverterFn = async (ctx) => {
   ctx.onProgress({ stage: 'loading-engine', message: 'Loading PDF tools' })
@@ -28,7 +34,7 @@ export const pdfExtractPages: ConverterFn = async (ctx) => {
   out.setProducer('Convert Everything (pdf-lib)')
   const bytes = await out.save()
   return {
-    outputs: [{ blob: new Blob([bytes as BlobPart], { type: 'application/pdf' }), name: outputName(ctx.file.name, 'pdf', `-pages-${String(ctx.options.pages || 'all').replace(/[^\d,-]/g, '').slice(0, 24)}`), formatId: 'pdf', meta: { pages: pages.length } }],
+    outputs: [{ blob: new Blob([bytes as BlobPart], { type: 'application/pdf' }), name: outputName(ctx.file.name, 'pdf', pageSuffix(String(ctx.options.pages ?? ''))), formatId: 'pdf', meta: { pages: pages.length } }],
     warnings: ['Bookmarks, form fields and links that point outside the selected pages may not carry over.'],
   }
 }

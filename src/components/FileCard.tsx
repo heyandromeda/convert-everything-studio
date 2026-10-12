@@ -34,8 +34,9 @@ function metaLine(item: QueueItem): string[] {
   if (m?.document?.slideCount) parts.push(`${m.document.slideCount} slide${m.document.slideCount === 1 ? '' : 's'}`)
   if (m?.sheet?.sheetNames?.length) parts.push(`${m.sheet.sheetNames.length} sheet${m.sheet.sheetNames.length === 1 ? '' : 's'}`)
   if (m?.sheet?.rowCount) parts.push(`${m.sheet.rowCount.toLocaleString()} rows`)
-  if (m?.archive?.entryCount !== undefined) parts.push(`${m.archive.entryCount} file${m.archive.entryCount === 1 ? '' : 's'}`)
-  if (m?.archive?.totalSize) parts.push(`${formatBytes(m.archive.totalSize)} unpacked`)
+  const atLeast = m?.archive?.entryCountIsMinimum ? 'at least ' : ''
+  if (m?.archive?.entryCount !== undefined) parts.push(`${m.archive.entryCount.toLocaleString()}${atLeast ? '+' : ''} file${m.archive.entryCount === 1 ? '' : 's'}`)
+  if (m?.archive?.totalSize) parts.push(`${atLeast}${formatBytes(m.archive.totalSize)} unpacked`)
   return parts
 }
 
@@ -173,6 +174,8 @@ export const FileCard = memo(function FileCard({ id }: { id: string }) {
           {item.conversionId?.startsWith('archive-extract') && detected.metadata.archive?.entries && detected.metadata.archive.entries.length > 1 && (
             <ArchiveEntryPicker
               entries={detected.metadata.archive.entries}
+              total={detected.metadata.archive.entryCount}
+              totalIsMinimum={detected.metadata.archive.entryCountIsMinimum}
               selected={Array.isArray(item.options.entries) ? item.options.entries : []}
               onChange={(paths) => setOptions(id, { entries: paths })}
               disabled={busy}

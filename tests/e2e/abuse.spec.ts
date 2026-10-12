@@ -1,4 +1,4 @@
-import { copyFileSync, mkdtempSync, readFileSync } from 'node:fs'
+import { copyFileSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { expect, test, addFiles, ascii, chooseTarget, convertAndWait, download, errorText, exif, fixture } from './helpers'
@@ -18,6 +18,25 @@ function identifyingTags(file: string) {
   return Object.entries(exif(file))
     .filter(([k]) => IDENTIFYING.test(k.split(':').pop() ?? ''))
     .filter(([k]) => !/^(File|System|ExifTool|Composite):/.test(k))
+}
+
+/**
+ * Writes every JPEG stream embedded in a PDF to its own file. pdfimages is not used because it
+ * rewrites the stream and would hide the EXIF block the check is looking for.
+ */
+function embeddedJpegs(pdf: Uint8Array): string[] {
+  const dir = mkdtempSync(path.join(tmpdir(), 'ce-pdfjpg-'))
+  const buf = Buffer.from(pdf)
+  const files: string[] = []
+  for (let i = buf.indexOf('ffd8ff', 0, 'hex'); i >= 0; i = buf.indexOf('ffd8ff', i + 2, 'hex')) {
+    const end = buf.indexOf('ffd9', i, 'hex')
+    if (end < 0) break
+    const file = path.join(dir, `stream-${files.length}.jpg`)
+    writeFileSync(file, buf.subarray(i, end + 2))
+    files.push(file)
+    i = end
+  }
+  return files
 }
 
 test.beforeEach(async ({ page }) => {
@@ -115,6 +134,56 @@ test.describe('damaged and hostile inputs fail clearly, never with a fake file',
   }
 })
 
+test.describe('TAR integrity', () => {
+  for (const file of ['truncated.tar', 'bad-checksum.tar']) {
+    test(`archive: ${file} is refused instead of extracting partial data`, async ({ page }) => {
+      await addFiles(page, [abuse(file)])
+      const card = page.getByTestId('file-card').first()
+      await chooseTarget(page, 0, 'archive-extract')
+      await convertAndWait(page)
+      expect(await errorText(page, 0)).toMatch(/damaged|incomplete|checksum/i)
+      await expect(card.getByTestId('download-link')).toHaveCount(0)
+    })
+  }
+})
+
+test.describe('document and data edge cases', () => {
+  test('Markdown → HTML output loads nothing remote when the saved file is opened', async ({ page }) => {
+    await addFiles(page, [abuse('remote-media.md')])
+    await chooseTarget(page, 0, 'md-to-html')
+    await convertAndWait(page)
+    const html = (await download(page, 0)).bytes.toString('utf8')
+    expect(html).not.toContain('tracker.example')
+    expect(html).toContain('href="https://example.com/"')
+    expect(html).toContain('cell')
+  })
+
+  test('inline SVGs without a size do not break Markdown → PDF', async ({ page }) => {
+    await addFiles(page, [abuse('svg-nosize.md')])
+    await chooseTarget(page, 0, 'md-to-pdf')
+    await convertAndWait(page)
+    const pdf = await download(page, 0)
+    expect(ascii(pdf.bytes, 0, 5)).toBe('%PDF-')
+  })
+
+  test('XML → JSON keeps leading zeros and still parses ordinary numbers', async ({ page }) => {
+    await addFiles(page, [abuse('postcodes.xml')])
+    await chooseTarget(page, 0, 'data-to-json')
+    await convertAndWait(page)
+    const json = JSON.parse((await download(page, 0)).bytes.toString('utf8'))
+    expect(json.places.place).toEqual({ zip: '02134', n: 12, rate: 0.5 })
+  })
+
+  test('a YAML alias bomb is refused with an accurate reason', async ({ page }) => {
+    await addFiles(page, [abuse('alias-bomb.yaml')])
+    await chooseTarget(page, 0, 'data-to-json')
+    await convertAndWait(page)
+    const err = await errorText(page, 0)
+    expect(err).toMatch(/expands too much/i)
+    expect(err).not.toMatch(/syntax/i)
+  })
+})
+
 test.describe('metadata removal', () => {
   test('JPEG: "Remove metadata" and WebP conversion drop GPS, camera, author and comments', async ({ page }) => {
     expect(identifyingTags(fixture(abuse('gps.jpg'))).length).toBeGreaterThan(3)
@@ -129,6 +198,23 @@ test.describe('metadata removal', () => {
     const webp = await download(page, 1)
     expect(ascii(webp.bytes, 8, 4)).toBe('WEBP')
     expect(identifyingTags(withExt(webp.path, '.webp'))).toEqual([])
+  })
+
+  test('JPEG → PDF and "images → one PDF" keep no GPS, camera or author data in the embedded photos', async ({ page }) => {
+    expect(identifyingTags(fixture(abuse('gps-rotated.jpg'))).length).toBeGreaterThan(3)
+    await addFiles(page, [abuse('gps.jpg'), abuse('gps-rotated.jpg')])
+    await chooseTarget(page, 0, 'image-to-pdf')
+    await chooseTarget(page, 1, 'image-to-pdf')
+    await page.getByRole('button', { name: '2 images → one PDF' }).click()
+    await expect(page.getByTestId('file-card')).toHaveCount(3)
+    await convertAndWait(page, 3)
+    for (let i = 0; i < 3; i++) {
+      const pdf = await download(page, i)
+      expect(ascii(pdf.bytes, 0, 5)).toBe('%PDF-')
+      const streams = embeddedJpegs(pdf.bytes)
+      expect(streams.length, `card ${i} embeds at least one JPEG`).toBeGreaterThan(0)
+      for (const s of streams) expect(identifyingTags(s), `card ${i} ${path.basename(s)}`).toEqual([])
+    }
   })
 
   test('PNG: "Remove metadata" drops eXIf and text chunks and keeps transparency', async ({ page }) => {

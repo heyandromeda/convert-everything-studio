@@ -4,9 +4,18 @@ import { formatBytes } from '@/lib/files'
 import type { ArchiveEntry } from '@/registry/types'
 
 /** Lets the user extract a subset of an archive. An empty selection means "everything". */
-export function ArchiveEntryPicker({ entries, selected, onChange, disabled }: { entries: ArchiveEntry[]; selected: string[]; onChange: (paths: string[]) => void; disabled?: boolean }) {
+export function ArchiveEntryPicker({ entries, total, totalIsMinimum, selected, onChange, disabled }: {
+  entries: ArchiveEntry[]
+  /** Files in the whole archive; `entries` may be a shortened listing. */
+  total?: number
+  totalIsMinimum?: boolean
+  selected: string[]
+  onChange: (paths: string[]) => void
+  disabled?: boolean
+}) {
   const [open, setOpen] = useState(false)
   const files = entries.filter((e) => !e.isDirectory)
+  const count = `${Math.max(total ?? 0, files.length).toLocaleString()}${totalIsMinimum ? '+' : ''}`
   const chosen = new Set(selected)
   const all = chosen.size === 0
   const toggle = (path: string) => {
@@ -22,7 +31,7 @@ export function ArchiveEntryPicker({ entries, selected, onChange, disabled }: { 
     <div className="rounded-[4px] border">
       <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex h-11 w-full items-center justify-between px-3.5 text-[14px] font-medium">
         <span>
-          {all ? `All ${files.length} files` : `${chosen.size} of ${files.length} files`} selected
+          {all ? `All ${count} files` : `${chosen.size} of ${count} files`} selected
         </span>
         <ChevronDownIcon className={`size-4 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>

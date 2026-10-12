@@ -90,10 +90,10 @@ export function FileDropzone({ onFiles, compact }: Props) {
     return (
       <div className="flex gap-2">
         {inputs}
-        <Button variant="secondary" size="touch" className="flex-1" onClick={() => inputRef.current?.click()}>
+        <Button variant="secondary" size="touch" className="min-w-0 flex-1 px-3 leading-tight whitespace-normal" onClick={() => inputRef.current?.click()}>
           <PlusIcon /> Add files
         </Button>
-        <Button variant="secondary" size="touch" className="flex-1" onClick={() => mediaRef.current?.click()}>
+        <Button variant="secondary" size="touch" className="min-w-0 flex-1 px-3 leading-tight whitespace-normal" onClick={() => mediaRef.current?.click()}>
           <ImagePlusIcon /> Photos & videos
         </Button>
         {dragging && <DragOverlay />}

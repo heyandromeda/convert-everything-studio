@@ -4,6 +4,21 @@ import type { ArchiveEntry } from '@/registry/types'
 export interface TarEntry extends ArchiveEntry {
   offset: number
   type: string
+  /** The header checksum is wrong, or the entry's data runs past the end of the archive. */
+  damaged?: boolean
+}
+
+/** POSIX checksum: header bytes summed with the checksum field read as spaces. Old tars summed signed bytes. */
+function checksumOk(b: Uint8Array, p: number): boolean {
+  const stored = octal(b, p + 148, 8)
+  let unsigned = 0
+  let signed = 0
+  for (let i = 0; i < 512; i++) {
+    const v = i >= 148 && i < 156 ? 32 : b[p + i]
+    unsigned += v
+    signed += v > 127 ? v - 256 : v
+  }
+  return stored === unsigned || stored === signed
 }
 
 function str(b: Uint8Array, start: number, len: number): string {
@@ -46,8 +61,10 @@ export function listTar(b: Uint8Array, maxEntries = 20000): TarEntry[] {
   let p = 0
   let longName: string | null = null
   let pax: Record<string, string> = {}
+  let damaged = false
   while (p + 512 <= b.length && entries.length < maxEntries) {
     if (b.subarray(p, p + 512).every((x) => x === 0)) break
+    if (!checksumOk(b, p)) damaged = true
     const name = str(b, p, 100)
     const size = octal(b, p + 124, 12)
     const type = String.fromCharCode(b[p + 156] || 48)
@@ -68,10 +85,12 @@ export function listTar(b: Uint8Array, maxEntries = 20000): TarEntry[] {
       // Symlinks and hard links are listed but never followed or extracted.
       const unsafe = type === '1' || type === '2' ? 'Link (not extracted)' : safe.problem
       if (type === '0' || type === '\0' || type === '5' || type === '1' || type === '2' || type === '7') {
-        entries.push({ path: safe.path || full, size: isDirectory ? 0 : realSize, isDirectory, unsafe, offset: dataStart, type })
+        const size = isDirectory ? 0 : realSize
+        entries.push({ path: safe.path || full, size, isDirectory, unsafe, offset: dataStart, type, damaged: damaged || dataStart + size > b.length || undefined })
       }
       longName = null
       pax = {}
+      damaged = false
     }
     p = next
   }

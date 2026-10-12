@@ -16,6 +16,8 @@ export async function readText(file: Blob, encoding = 'auto') {
   return decodeText(new Uint8Array(await file.arrayBuffer()), encoding)
 }
 
+const REMOTE_ATTRS = new Set(['src', 'poster', 'background', 'href', 'xlink:href', 'data', 'action', 'formaction', 'ping', 'longdesc', 'lowsrc', 'dynsrc'])
+
 /** Sanitises untrusted HTML: no scripts, handlers, forms, frames, or remote resources. */
 export async function sanitizeHtml(html: string): Promise<string> {
   const DOMPurify = (await import('dompurify')).default
@@ -34,6 +36,17 @@ export async function sanitizeHtml(html: string): Promise<string> {
   for (const a of Array.from(doc.querySelectorAll('a[href]'))) {
     const href = a.getAttribute('href') ?? ''
     if (!/^(https?:|mailto:|#)/i.test(href)) a.removeAttribute('href')
+  }
+  // Media, posters, table backgrounds and SVG <image>/<use> load as soon as the saved file is opened.
+  // Only inline data and same-document fragments are kept.
+  for (const el of Array.from(doc.body.querySelectorAll('*'))) {
+    for (const attr of Array.from(el.attributes)) {
+      const name = attr.name.toLowerCase()
+      // Link targets were vetted above and are only fetched when clicked.
+      if (!REMOTE_ATTRS.has(name) || (el.localName === 'a' && name === 'href')) continue
+      const v = attr.value.trim()
+      if (!v.startsWith('data:') && !v.startsWith('#')) el.removeAttribute(attr.name)
+    }
   }
   return doc.body.innerHTML
 }

@@ -170,6 +170,8 @@ export interface ArchiveEntry {
 
 export interface ArchiveMeta {
   entryCount?: number
+  /** The listing stopped at a cap, so entryCount and totalSize are lower bounds. */
+  entryCountIsMinimum?: boolean
   totalSize?: number
   entries?: ArchiveEntry[]
   truncated?: boolean

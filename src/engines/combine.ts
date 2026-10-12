@@ -1,4 +1,5 @@
 import { ConversionError, throwIfAborted } from '@/lib/errors'
+import { stripJpegMetadata } from '@/lib/exif'
 import { safeFilename, uniqueName } from '@/lib/files'
 import type { ConverterFn, SourceFile } from '@/registry/types'
 import { decodeImage } from './images/decode'
@@ -24,7 +25,8 @@ export const imagesToOnePdf: ConverterFn = async (ctx) => {
     ctx.onProgress({ stage: 'processing', ratio: i / list.length, message: `Adding ${file.name}` })
     const orientation = input.metadata.image?.orientation
     if (input.formatId === 'jpeg' && (!orientation || orientation === 1)) {
-      const img = await doc.embedJpg(new Uint8Array(await file.arrayBuffer()))
+      // Original JPEG data without re-compression, minus EXIF, GPS, XMP and comments.
+      const img = await doc.embedJpg(stripJpegMetadata(new Uint8Array(await file.arrayBuffer())).data)
       addImagePage(doc, img, img.width, img.height, String(ctx.options.pageSize ?? 'a4'))
       continue
     }

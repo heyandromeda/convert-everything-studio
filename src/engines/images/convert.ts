@@ -22,7 +22,19 @@ async function prepare(ctx: ConvertContext, target: string): Promise<Prepared> {
   ctx.onProgress({ stage: 'preparing', message: 'Decoding image' })
   const fmt = input.formatId ?? ''
   // Vector sources are rasterised directly at the requested size.
-  let img = await decodeImage(file, fmt, caps)
+  let img = await decodeImage(file, fmt, caps).catch((e: unknown) => {
+    // A browser refuses to decode a bitmap far beyond its canvas limit; say so instead of "damaged".
+    const { width = 0, height = 0 } = input.metadata.image ?? {}
+    if (e instanceof ConversionError && e.code === 'decode-failed' && fmt !== 'svg' && width * height > caps.maxCanvasPixels) {
+      throw new ConversionError(
+        'too-large',
+        'This image is too large to open in the browser',
+        `It is ${width.toLocaleString()}×${height.toLocaleString()} pixels (${Math.round((width * height) / 1e6).toLocaleString()} megapixels), more than this browser can decode.`,
+        'Reduce its size in a desktop app first.',
+      )
+    }
+    throw e
+  })
   let size = computeTargetSize(img.width, img.height, options, caps.maxCanvasPixels)
   if (fmt === 'svg' && (size.width !== img.width || size.height !== img.height)) {
     const scale = size.width / img.width
@@ -142,15 +154,14 @@ export const imageToPdf: ConverterFn = async (ctx) => {
   let w: number
   let h: number
   const resizing = (ctx.options.resizeMode ?? 'none') !== 'none'
-  if (ctx.input.formatId === 'jpeg' && !resizing) {
-    // Embed the original JPEG bytes: no re-compression and no quality loss.
-    embedded = await doc.embedJpg(new Uint8Array(await ctx.file.arrayBuffer()))
+  const orientation = ctx.input.metadata.image?.orientation
+  // Rotated JPEGs go through the canvas. pdf-lib writes every embedded image, even one never
+  // placed on a page, so the original must not be embedded first and discarded.
+  if (ctx.input.formatId === 'jpeg' && !resizing && (!orientation || orientation === 1)) {
+    // Embed the original JPEG data (no re-compression), minus EXIF, GPS, XMP and comments.
+    embedded = await doc.embedJpg(stripJpegMetadata(new Uint8Array(await ctx.file.arrayBuffer())).data)
     w = embedded.width
     h = embedded.height
-    const orientation = ctx.input.metadata.image?.orientation
-    if (orientation && orientation !== 1) {
-      embedded = undefined
-    }
   }
   if (!embedded) {
     const prepared = await prepare(ctx, 'pdf')

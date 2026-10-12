@@ -1,5 +1,9 @@
 import { defineConfig, devices } from '@playwright/test'
 
+// Chromium on Linux names downloads through the process locale. Without a UTF-8 locale every
+// non-ASCII file name is saved as "download", which breaks the Unicode file-name test.
+if (!/utf-?8/i.test(process.env.LC_ALL || process.env.LANG || '')) process.env.LC_ALL = 'C.UTF-8'
+
 /**
  * End-to-end tests run against the production build (with its Content Security Policy),
  * so they exercise exactly what is deployed.
