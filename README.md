@@ -2,6 +2,10 @@
 
 **Website:** https://convert-everything-preview.vercel.app
 
+Same app, production Vercel hostname: https://convert-everything-one.vercel.app  
+Source: https://github.com/heyandromeda/convert-everything-studio  
+GitHub Pages (after this workflow runs on `main`): https://heyandromeda.github.io/convert-everything-studio/
+
 This is a website. Open that address in Safari, Chrome, or Firefox. There is no app to install and no App Store listing. On an iPhone, use Safari. Share → Add to Home Screen only saves a shortcut to this same website.
 
 It converts files in the browser tab. Images, documents, spreadsheets, data files, subtitles, archives, audio and video stay on the device and are converted with JavaScript and WebAssembly. Nothing is uploaded.
@@ -235,7 +239,11 @@ LIVE_URL=https://convert-everything-preview.vercel.app npx playwright test live-
 - Root `vercel.json` (generated from `security-headers.mjs` by `node scripts/write-vercel-config.mjs`; a unit test keeps them in sync) for Git-based Vercel builds.
 - The CSP is also embedded as a `<meta>` tag, so it applies even on hosts that ignore header files.
 
-**Vercel (current preview host):** `npm run deploy:preview` builds locally, uploads a preview deployment with the Vercel CLI (after `vercel login` and `vercel link`), and points the stable preview address at that deployment: https://convert-everything-preview.vercel.app. It does not publish a production release. The project has Vercel Authentication and the preview feedback toolbar turned off: the toolbar injects a third-party script, which the e2e cross-origin guard flags.
+**Vercel:** `npm run deploy:preview` builds locally, uploads a preview deployment with the Vercel CLI (after `vercel login` and `vercel link`), and points the stable preview address at that deployment: https://convert-everything-preview.vercel.app. Production on this Vercel team is https://convert-everything-one.vercel.app (the shorter `convert-everything.vercel.app` name is already taken). The project has Vercel Authentication and the preview feedback toolbar turned off: the toolbar injects a third-party script, which the e2e cross-origin guard flags.
+
+**GitHub Pages:** `.github/workflows/pages.yml` builds with `VITE_BASE=/convert-everything-studio/` and publishes to https://heyandromeda.github.io/convert-everything-studio/ on pushes to `main`. GitHub does not send `dist/_headers`; the CSP meta tag still applies.
+
+**GitHub CI:** `.github/workflows/ci.yml` runs typecheck, lint, and unit tests on pull requests and on `main`.
 
 `netlify.toml` configures Git-based Netlify builds (`npm run build`, publish `dist`). No server-side code or functions exist in this project.
 
